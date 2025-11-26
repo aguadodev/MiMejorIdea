@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>
+			{% block title %}Welcome!
+			{% endblock %}
+		</title>
+		<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>"> {% block stylesheets %}{% endblock %}{% block javascripts %}{% endblock %}
+		</head>
+		<body>
+			{% block body %}
+				{% if app.flashes %}
+					{# Itera sobre los diferentes tipos de flash messages #}
+					{% for type, messages in app.flashes %}
+						{# Itera sobre los mensajes de cada tipo #}
+						{% for message in messages %}
+							{# Muestra el mensaje en un div o similar, con una clase basada en el tipo #}
+							<div class="alert alert-{{ type }}">
+								{{ message }}
+							</div>
+						{% endfor %}
+					{% endfor %}
+				{% endif %}
+
+			{% endblock %}
+		</body>
+	</html>
