@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\User;
+use App\Form\ProfileType;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route('/profile')]
+final class ProfileController extends AbstractController
+{
+    #[Route('/', name: 'app_profile_show', methods: ['GET'])]
+    public function show(): Response
+    {
+        return $this->render('profile/show.html.twig', [
+            'user' => $this->getUser(),
+        ]);
+    }
+
+    #[Route('/edit', name: 'app_profile_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(ProfileType::class, $this->getUser());
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_profile_show', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('profile/edit.html.twig', [
+            'user' => $this->getUser(),
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/delete', name: 'app_profile_delete', methods: ['POST'])]
+    public function delete(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete' . $$this->getUser()->getId(), $request->getPayload()->getString('_token'))) {
+            $entityManager->remove($this->getUser());
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('app_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/resend/email', name: 'app_resend_email')]
+    public function resendVerificationEmail(Request $request, RegistrationController $rc): Response
+    {
+        $user = $this->getUser();
+
+        // Envía un email de confirmación al nuevo email
+        $rc->sendEmailConfirmation($user);
+
+        // e Informa al usuario con un mensaje flash
+        $this->addFlash('success', 'Se ha enviado un mensaje para verificar tu dirección de correo electrónico.');
+
+        return $this->redirectToRoute('app_profile_show', [], Response::HTTP_SEE_OTHER);
+    }
+}
