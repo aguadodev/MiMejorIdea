@@ -21,16 +21,25 @@ class RegistrationController extends AbstractController
     public function __construct(private EmailVerifier $emailVerifier) {}
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, UserRepository $userRepository): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+        // Comprobación manual sen revelar nada
+        if ($userRepository->findOneBy(['email' => $user->getEmail()])) {
+            
+            $this->addFlash('alert', 'Consulta tu bandeja de entrada para verificar tu correo electrónico');
+            // Mensaxe totalmente xenérica
+            return $this->redirectToRoute('app_index');
+        }
+
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
-
+            
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 

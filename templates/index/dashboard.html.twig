@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mi Mejor Idea - Dashboard{% endblock %}
+
+{% block body %}
+
+    <h2>Dashboard</h2>
+
+    <p>Resumen de tu contenido y situación ({{ app.user.email }})</p>
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <li><a href="{{ path('app_profile_show') }}">Perfil</a></li>
+    {% else %}
+        <li><a href="{{ path('app_login') }}">Login</a></li>
+        <li><a href="{{ path('app_register') }}">Registro</a></li>
+    {% endif %}
+
+{% endblock %}

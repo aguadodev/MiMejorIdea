@@ -1,22 +1,27 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello IndexController!{% endblock %}
+{% block title %}Mi Mejor Idea{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <h2>Hola! Ola! Hello! </h2>
 
-    <p>Esta será la portada de la aplicación web</p>
+    <p>Bienvenid@ a Mi Mejor Idea</p>
 
-    This friendly message is coming from:
+    <p>
+    {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+		<a href="{{ path('app_login') }}" class="btn btn-primary">Inicia Sesión</a>
+        <a href="{{ path('app_register') }}" class="btn btn-primary">Registro de Nuevo Usuari@</a>
+    {% else %}
+		<a href="{{ path('app_dashboard') }}" class="btn btn-primary">Accede a tu Panel de Control</a>
+    {% endif %}                     
+    </p>
+
+    <p><img src="{{ asset('assets/img/logoMiMejorIdeaBlanco.png') }}" heigth="100" width="100"></p>
+
+    <p>Estas son las últimas novedades:</p>
     <ul>
-        <li>Your controller at <code>C:/Users/Óscar/Documents/0.PROYECTOS/compartir/src/Controller/IndexController.php</code></li>
-        <li>Your template at <code>C:/Users/Óscar/Documents/0.PROYECTOS/compartir/templates/index/index.html.twig</code></li>
+    <li>2025-12-01 - Creación y despliegue del sitio web</li>
     </ul>
-</div>
+
 {% endblock %}

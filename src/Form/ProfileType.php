@@ -14,15 +14,15 @@ class ProfileType extends AbstractType
         $builder
             ->add('email')
             //->add('roles')
-            ->add('password')
-            ->add('isVerified')
+            //->add('password')
+            //->add('isVerified')
             ->add('username')
-            ->add('createdAt', null, [
-                'widget' => 'single_text',
-            ])
-            ->add('updatedAt')
-            ->add('lastLogin')
-            ->add('enabled')
+            //->add('createdAt', null, [
+            //    'widget' => 'single_text',
+            //])
+            //->add('updatedAt')
+            //->add('lastLogin')
+            //->add('enabled')
         ;
     }
 

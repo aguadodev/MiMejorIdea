@@ -19,6 +19,12 @@ final class IndexController extends AbstractController
         ]);
     }
 
+    #[Route('/dashboard', name: 'app_dashboard')]
+    public function dashboard(): Response
+    {
+        return $this->render('index/dashboard.html.twig');
+    }
+
     #[Route('/about', name: 'app_about')]
     public function about(): Response
     {
@@ -27,24 +33,30 @@ final class IndexController extends AbstractController
         ]);
     }
 
-#[Route('/mail', name: 'app_mail')]
-public function sendEmail(MailerInterface $mailer): Response
-{
-    $email = (new Email())
-        ->from('hello@example.com')
-        ->to('aguadoaudiovisual@gmail.com')
-        //->cc('cc@example.com')
-        //->bcc('bcc@example.com')
-        //->replyTo('fabien@example.com')
-        //->priority(Email::PRIORITY_HIGH)
-        ->subject('Enviando correo de prueba desde la aplicación!')
-        ->text('Contenido en texto plano!')
-        ->html('<p>Contenido en formato HTML. Se pueden aplicar plantillas Twig para mayor flexibilidad y reutilización</p>');
+    #[Route('/terms', name: 'app_terms')]
+    public function terms(): Response
+    {
+        return $this->render('index/terms.html.twig');
+    }
 
 
-    $mailer->send($email);
-   
-    dd($email);
-}
-    
+    #[Route('/mail', name: 'app_mail')]
+    public function sendEmail(MailerInterface $mailer): Response
+    {
+        $email = (new Email())
+            ->from('hello@example.com')
+            ->to('aguadoaudiovisual@gmail.com')
+            //->cc('cc@example.com')
+            //->bcc('bcc@example.com')
+            //->replyTo('fabien@example.com')
+            //->priority(Email::PRIORITY_HIGH)
+            ->subject('Enviando correo de prueba desde la aplicación!')
+            ->text('Contenido en texto plano!')
+            ->html('<p>Contenido en formato HTML. Se pueden aplicar plantillas Twig para mayor flexibilidad y reutilización</p>');
+
+
+        $mailer->send($email);
+
+        dd($email);
+    }
 }
