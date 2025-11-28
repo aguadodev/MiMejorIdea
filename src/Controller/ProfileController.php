@@ -9,6 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+
 
 #[Route('/profile')]
 final class ProfileController extends AbstractController
@@ -24,10 +26,14 @@ final class ProfileController extends AbstractController
     #[Route('/edit', name: 'app_profile_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(ProfileType::class, $this->getUser());
+        $user = $this->getUser();
+        $form = $this->createForm(ProfileType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            // Actualiza la fecha de modificación
+            $user->setUpdatedAt(new \DateTime());              
             $entityManager->flush();
 
             return $this->redirectToRoute('app_profile_show', [], Response::HTTP_SEE_OTHER);
@@ -40,10 +46,15 @@ final class ProfileController extends AbstractController
     }
 
     #[Route('/delete', name: 'app_profile_delete', methods: ['POST'])]
-    public function delete(Request $request, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $$this->getUser()->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($this->getUser());
+        $user = $this->getUser();
+        if ($this->isCsrfTokenValid('delete' . $this->getUser()->getId(), $request->getPayload()->getString('_token'))) {
+            // Cerrar sesión (Logout) => invalidate session
+            $request->getSession()->invalidate();
+            $tokenStorage->setToken(null);
+
+            $entityManager->remove($user);
             $entityManager->flush();
         }
 

@@ -115,6 +115,8 @@ class ResetPasswordController extends AbstractController
 
             // Encode(hash) the plain password, and set it.
             $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+            // Actualiza la fecha de modificación
+            $user->setUpdatedAt(new \DateTime());            
             $this->entityManager->flush();
 
             // The session is cleaned up after the password has been changed.
