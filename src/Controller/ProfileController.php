@@ -24,13 +24,24 @@ final class ProfileController extends AbstractController
     }
 
     #[Route('/edit', name: 'app_profile_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, EntityManagerInterface $entityManager, RegistrationController $rc): Response
     {
         $user = $this->getUser();
         $form = $this->createForm(ProfileType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+
+            // Comprueba si se ha modificado el email
+            if ($user->getEmail() != $form->get('oldEmail')->getData()) {
+                // Cambia el estado de verificado a falso
+                $user->setIsVerified(false);
+                // Envía un email de confirmación al nuevo email
+                $rc->sendEmailConfirmation($user);    
+                // e Informa al usuario con un mensaje flash
+                $this->addFlash('success', 'Se ha enviado un email de confirmación a tu nuevo email');
+            }       
 
             // Actualiza la fecha de modificación
             $user->setUpdatedAt(new \DateTime());              

@@ -68,7 +68,7 @@ class RegistrationController extends AbstractController
             (new TemplatedEmail())
                 ->from(new Address('compartirmimejoridea@gmail.com', 'Mi Mejor Idea'))
                 ->to((string) $user->getEmail())
-                ->subject('Please Confirm your Email')
+                ->subject('Verifica tu Correo Electrónico')
                 ->htmlTemplate('registration/confirmation_email.html.twig')
         );
     }
