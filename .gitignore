@@ -9,3 +9,6 @@
 /vendor/
 ###< symfony/framework-bundle ###
 /.env
+
+/public/img/profile_photos/*
+!/public/img/profile_photos/default_profile_photo.png

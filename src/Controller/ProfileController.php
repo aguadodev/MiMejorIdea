@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 
 #[Route('/profile')]
@@ -24,14 +26,44 @@ final class ProfileController extends AbstractController
     }
 
     #[Route('/edit', name: 'app_profile_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, EntityManagerInterface $entityManager, RegistrationController $rc): Response
+    public function edit(Request $request, EntityManagerInterface $entityManager, RegistrationController $rc, SluggerInterface $slugger): Response
     {
         $user = $this->getUser();
         $form = $this->createForm(ProfileType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $photoFile = $form->get('photo')->getData();
+            if ($photoFile) {
+                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                // this is needed to safely include the file name as part of the URL
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$photoFile->guessExtension();
 
+                // Move the file to the directory where photos are stored
+                try {
+                    
+                    $photoFile->move(
+                        $this->getParameter('profile_photos_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    // ... handle exception if something happens during file upload
+                    $this->addFlash('error', 'Error al subir la foto de perfil');
+                }
+                
+                // Borra el fichero de imagen de perfil anterior si existe
+                if ($user->getPhotoFilename()) {
+                    $oldPhoto = $user->getPhotoFilename();
+                    $oldPhotoPath = $this->getParameter('profile_photos_directory').'/'.$oldPhoto;
+                    if (file_exists($oldPhotoPath)) {
+                        unlink($oldPhotoPath);
+                    }
+                }
+
+                // updates the property to store the file name instead of its contents
+                $user->setPhotoFilename($newFilename);
+            }
 
             // Comprueba si se ha modificado el email
             if ($user->getEmail() != $form->get('oldEmail')->getData()) {

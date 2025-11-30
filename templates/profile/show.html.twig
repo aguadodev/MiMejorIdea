@@ -5,6 +5,16 @@
 {% block body %}
 	<h2>Perfil de Usuari@</h2>
 
+    {% if user.photoFilename %}
+        <p><a href="{{ asset('assets/img/profile_photos/' ~ user.photoFilename) }}">
+        <img height="200" src="{{ asset('assets/img/profile_photos/' ~ user.photoFilename) }}">
+        </a></p>
+    {% else %}
+        <p><a href="{{ path('app_profile_edit') }}">
+        <img width="200" src="{{ asset('assets/img/profile_photos/default_profile_photo.png') }}">
+        </a></p>    
+    {% endif %}
+
 	<table class="table">
 		<tbody>
 			<tr>
