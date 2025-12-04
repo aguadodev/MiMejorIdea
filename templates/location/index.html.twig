@@ -5,7 +5,7 @@
 {% block body %}
     <h2>Mis Localizaciones</h2>
 
-    <table class="table">
+    <table id="myTable" {#class="table"#}>
         <thead>
             <tr>
                 <th>Dirección</th>
@@ -43,4 +43,16 @@
     </table>
 
     <a href="{{ path('app_location') }}" class="btn btn-primary">Crear nueva</a>
+
+
+    {# DATATABLES #}
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>    
+    <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
+    <script>
+        let table = new DataTable('#myTable', {
+            // options
+        });
+    </script>    
+
 {% endblock %}
