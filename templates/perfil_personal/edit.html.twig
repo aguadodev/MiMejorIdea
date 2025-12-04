@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar Perfil Personal{% endblock %}
+
+{% block body %}
+    <h2>Editar Perfil Personal</h2>
+
+    {{ form_start(form) }}
+
+    <div class="mb-3">
+        {{ form_row(form.nombre) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_row(form.Apellidos) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_row(form.fechaNacimiento) }}
+    </div>
+
+    <div class="campo-form">
+        {{ form_row(form.telefono) }}
+    </div>
+
+    <div class="campo-form">
+        {{ form_row(form.homeLocation) }}
+    </div>
+
+    {# Bloque HTML intercalado #}
+    <div style="margin: 10px 0;">
+        * Si tu localización no aparece en el desplegable puedes 
+        <a href="{{ path('app_location', { 'redirect_to': app.request.uri }) }}" 
+        class="crear-localizacion">
+            Crear una nueva localización
+        </a>
+    </div>
+
+    <div class="campo-form">
+        {{ form_row(form.workLocation) }}
+    </div>
+
+    <button class="btn btn-primary">{{ button_label|default('Actualizar') }}</button>
+
+    {{ form_end(form) }}
+
+    {{ include('perfil_personal/_delete_form.html.twig') }}
+
+    <div>
+	    <a href="{{ path('perfil_personal_show') }}" class="btn btn-secondary">Volver al Perfil Personal</a>
+    </div>
+
+    {{ include('snnipets/_alert_cambios_sin_guardar.html.twig') }}
+
+{% endblock %}

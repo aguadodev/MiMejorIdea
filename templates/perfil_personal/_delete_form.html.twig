@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('perfil_personal_delete', {'id': perfil_personal.id}) }}" onsubmit="return confirm('Seguro que quieres borrar tu perfil de usuari@? Esta acción será IRREVERSIBLE!!');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ perfil_personal.id) }}">
+    <button class="btn btn-danger">Borrar</button>
+</form>

@@ -18,7 +18,7 @@ class ProfileType extends AbstractType
     {
         $builder
             ->add('email')
-            ->add('oldEmail', HiddenType::class, ['mapped' => false])
+            ->add('oldEmail', HiddenType::class, ['mapped' => false, 'data' => $options['data']->getEmail()])
             //->add('roles')
             //->add('password')
             //->add('isVerified')

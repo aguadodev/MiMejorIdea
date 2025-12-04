@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar Perfil Personal{% endblock %}
+
+{% block body %}
+    <h1>Editar Perfil Personal</h1>
+
+    {{ include('perfil_personal/_form.html.twig', {'button_label': 'Actualizar'}) }}
+
+    {{ include('perfil_personal/_delete_form.html.twig') }}
+
+    <div>
+        * Si tu localización no aparece en el desplegable puedes <a href="{{ path('app_location', { 'redirect_to': app.request.uri }) }}">
+        Crear una nueva localización</a>
+    </div>
+
+    <div>
+	    <a href="{{ path('perfil_personal_show') }}" class="btn btn-secondary">Volver al Perfil Personal</a>
+    </div>
+
+{% endblock %}

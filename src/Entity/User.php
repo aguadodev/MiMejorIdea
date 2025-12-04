@@ -55,6 +55,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photoFilename = null;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?PerfilPersonal $perfilPersonal = null;
+
 
     public function __construct()
     {
@@ -229,6 +232,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhotoFilename(?string $photoFilename): static
     {
         $this->photoFilename = $photoFilename;
+
+        return $this;
+    }
+
+    public function getPerfilPersonal(): ?PerfilPersonal
+    {
+        return $this->perfilPersonal;
+    }
+
+    public function setPerfilPersonal(PerfilPersonal $perfilPersonal): static
+    {
+        // set the owning side of the relation if necessary
+        if ($perfilPersonal->getUser() !== $this) {
+            $perfilPersonal->setUser($this);
+        }
+
+        $this->perfilPersonal = $perfilPersonal;
 
         return $this;
     }

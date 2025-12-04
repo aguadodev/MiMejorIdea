@@ -58,7 +58,7 @@
 					<a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
 
 						<div class="avatar-sm">
-							<img src="{{ asset('assets/img/profile_photos/' ~ app.user.photoFilename) }}" alt="..." class="avatar-img rounded-circle"/>
+							<img src="{{ asset('assets/img/profile_photos/' ~ app.user.photoFilename ?? 'default_profile_photo.png') }}" alt="..." class="avatar-img rounded-circle"/>
 						</div>                       
 						<span class="profile-username">
 							<span class="op-7">Hola,</span>
@@ -70,7 +70,7 @@
 							<li>
 								<div class="user-box">
 									<div class="avatar-lg">
-										<img src="{{ asset('assets/img/profile_photos/' ~ app.user.photoFilename) }}" alt="image profile" class="avatar-img rounded"/>
+										<img src="{{ asset('assets/img/profile_photos/' ~ app.user.photoFilename ?? 'default_profile_photo.png') }}" alt="image profile" class="avatar-img rounded"/>
 									</div>
 									<div class="u-text">
 										<h4>{{ app.user.username }}</h4>
@@ -82,7 +82,15 @@
 							<li>
 								<div class="dropdown-divider"></div>
 								<a class="dropdown-item" href="{{ path('app_profile_show') }}">Perfil de Usuari@</a>
+    							<a class="dropdown-item" href="{{ path('app_forgot_password_request') }}">Resetear Contraseña</a>
+							{% if app.user.perfilpersonal %}								
 								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="{{ path('perfil_personal_show') }}">Perfil Personal</a>
+								<a class="dropdown-item" href="{{ path('app_location_index') }}">Mis Localizaciones</a>
+							{% endif %}	
+							
+								<div class="dropdown-divider"></div>
+
 								<a class="dropdown-item" href="{{ path('app_logout') }}">Cerrar sesión</a>
 							</li>
 						</div>

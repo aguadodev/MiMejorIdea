@@ -1,18 +1,47 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mi Mejor Idea - Dashboard{% endblock %}
+{% block title %}Mi Mejor Idea - Panel de Control{% endblock %}
 
 {% block body %}
 
-    <h2>Dashboard</h2>
+    <h2>Panel de Control</h2>
 
     <p>Resumen de tu contenido y situación ({{ app.user.email }})</p>
 
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-        <li><a href="{{ path('app_profile_show') }}">Perfil</a></li>
+
+        <div class="row">
+            <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                <div class="card-head-row card-tools-still-right">
+                    <div class="card-title">Mis Datos</div>
+                </div>
+                </div>
+                <div class="card-body">
+                <ol class="activity-feed">
+                    <li class="feed-item feed-item-success">
+                    <a href="{{ path('app_profile_show') }}">Perfil de Usuari@</a></span>
+                    </li>
+                    <li class="feed-item feed-item-info">
+                    <a href="{{ path('perfil_personal_show') }}">Perfil Personal</a></span>
+                    </li>
+                    {% if app.user.perfilpersonal %}
+                    <li class="feed-item feed-item-info">
+                    <a href="{{ path('app_location_index') }}">Mis Localizaciones</a></span>
+                    </li>
+                    {% endif %}
+                </ol>
+                </div>
+            </div>
+            </div>
+        </div>
+
     {% else %}
         <li><a href="{{ path('app_login') }}">Login</a></li>
         <li><a href="{{ path('app_register') }}">Registro</a></li>
     {% endif %}
+
+
 
 {% endblock %}

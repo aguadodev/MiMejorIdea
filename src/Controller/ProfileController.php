@@ -55,9 +55,9 @@ final class ProfileController extends AbstractController
                 // Borra el fichero de imagen de perfil anterior si existe
                 if ($user->getPhotoFilename()) {
                     $oldPhoto = $user->getPhotoFilename();
-                    $oldPhotoPath = $this->getParameter('profile_photos_directory').'/'.$oldPhoto;
-                    if (file_exists($oldPhotoPath)) {
-                        unlink($oldPhotoPath);
+                    $photoPath = $this->getParameter('profile_photos_directory').'/'.$oldPhoto;
+                    if (file_exists($photoPath)) {
+                        unlink($photoPath);
                     }
                 }
 
@@ -65,6 +65,7 @@ final class ProfileController extends AbstractController
                 $user->setPhotoFilename($newFilename);
             }
 
+            //dd($user->getEmail() . " - " . $form->get('oldEmail')->getData());
             // Comprueba si se ha modificado el email
             if ($user->getEmail() != $form->get('oldEmail')->getData()) {
                 // Cambia el estado de verificado a falso
@@ -93,6 +94,14 @@ final class ProfileController extends AbstractController
     {
         $user = $this->getUser();
         if ($this->isCsrfTokenValid('delete' . $this->getUser()->getId(), $request->getPayload()->getString('_token'))) {
+            // Borra el fichero de foto de perfil si existe
+            if ($user->getPhotoFilename()) {
+                $photoPath = $this->getParameter('profile_photos_directory').'/'.$user->getPhotoFilename();
+                if (file_exists($photoPath)) {
+                    unlink($photoPath);
+                }
+            }
+            
             // Cerrar sesión (Logout) => invalidate session
             $request->getSession()->invalidate();
             $tokenStorage->setToken(null);

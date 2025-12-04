@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Perfil Personal{% endblock %}
+
+{% block body %}
+    <h2>Perfil Personal</h2>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Nombre</th>
+                <td>{{ perfil_personal.nombre }}</td>
+            </tr>
+            <tr>
+                <th>Apellidos</th>
+                <td>{{ perfil_personal.Apellidos }}</td>
+            </tr>
+            <tr>
+                <th>FechaNacimiento</th>
+                <td>{{ perfil_personal.fechaNacimiento ? perfil_personal.fechaNacimiento|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Telefono</th>
+                <td><a href="tel:{{ perfil_personal.telefono }}">{{ perfil_personal.telefono }}</a></td>
+            </tr>
+             <tr>
+                <th>Home Location</th>
+                <td><a href="{{ path('app_location_show', {'id': perfil_personal.homeLocation.id}) }}">
+                {{ perfil_personal.homeLocation }}</a></td>
+            </tr>
+             <tr>
+                <th>Work Location</th>
+                <td><a href="{{ path('app_location_show', {'id': perfil_personal.workLocation.id}) }}">
+                {{ perfil_personal.workLocation }}</a></td>
+            </tr>
+            {% if perfil_personal.homeLocation and perfil_personal.workLocation %}
+             <tr>
+                <th>Mi Ruta Diaria</th>
+                <td>
+                    <a href="{{ path('app_location_ruta', {
+                        home: perfil_personal.homeLocation.id,
+                        work: perfil_personal.workLocation.id
+                        }) }}">
+                        Ver ruta en el mapa
+                    </a>                
+                </td>
+            </tr>        
+            {% else %}
+            {% endif %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('perfil_personal_edit') }}" class="btn btn-primary">Editar</a>
+
+    {{ include('perfil_personal/_delete_form.html.twig') }}
+
+	<a href="{{ path('app_dashboard') }}" class="btn btn-secondary">Volver al Panel de Control</a>
+
+{% endblock %}

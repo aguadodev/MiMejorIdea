@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}PerfilPersonal index{% endblock %}
+
+{% block body %}
+    <h2>PerfilPersonal index</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>FechaNacimiento</th>
+                <th>Telefono</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for perfil_personal in perfil_personals %}
+            <tr>
+                <td>{{ perfil_personal.id }}</td>
+                <td>{{ perfil_personal.nombre }}</td>
+                <td>{{ perfil_personal.Apellidos }}</td>
+                <td>{{ perfil_personal.fechaNacimiento ? perfil_personal.fechaNacimiento|date('Y-m-d') : '' }}</td>
+                <td>{{ perfil_personal.telefono }}</td>
+                <td>
+                    <a href="{{ path('app_perfil_personal_show', {'id': perfil_personal.id}) }}">show</a>
+                    <a href="{{ path('app_perfil_personal_edit', {'id': perfil_personal.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_perfil_personal_new') }}">Create new</a>
+{% endblock %}

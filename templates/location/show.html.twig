@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Localización{% endblock %}
+
+{% block body %}
+    <h2>Localización</h2>
+
+    <div id="map" style="height: 240px;"></div>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Dirección</th>
+                <td>{{ location.address }}</td>
+            </tr>
+            <tr>
+                <th>Latitud</th>
+                <td>{{ location.latitude }}</td>
+            </tr>
+            <tr>
+                <th>Longitud</th>
+                <td>{{ location.longitude }}</td>
+            </tr>
+            <tr>
+                <th>Calle</th>
+                <td>{{ location.street }}</td>
+            </tr>
+            <tr>
+                <th>Ciudad</th>
+                <td>{{ location.city }}</td>
+            </tr>
+            <tr>
+                <th>Provincia</th>
+                <td>{{ location.state }}</td>
+            </tr>
+            <tr>
+                <th>Código Postal</th>
+                <td>{{ location.postcode }}</td>
+            </tr>
+            <tr>
+                <th>País</th>
+                <td>{{ location.country }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="javascript:history.back()" class="btn btn-primary">Volver</a>
+
+    {# Sólo muestra el botón de borrar si el usuario creó la localización #}
+    {% if location.user is same as(app.user) %}
+        {{ include('location/_delete_form.html.twig') }}
+    {% endif %}
+
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+let initialLocation = [{{ location.latitude }}, {{ location.longitude }}]; // IES Chan do Monte de Marín
+
+const map = L.map('map').setView(initialLocation, 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19,}).addTo(map);
+
+let marker = L.marker(initialLocation, { draggable: false }).addTo(map);
+</script>    
+
+{% endblock %}

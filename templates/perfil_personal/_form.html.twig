@@ -1,0 +1,38 @@
+{{ form_start(form) }}
+
+    {#{{ form_widget(form) }}#}
+    <div class="mb-3">
+        {{ form_row(form.nombre) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_row(form.Apellidos) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_row(form.fechaNacimiento) }}
+    </div>
+
+    <div class="campo-form">
+        {{ form_row(form.telefono) }}
+    </div>
+
+    <div class="campo-form">
+        {{ form_row(form.homeLocation) }}
+    </div>
+
+    {# Bloque HTML intercalado #}
+    <div style="margin: 10px 0;" class="small">
+        * Si tu localización no aparece en el desplegable puedes 
+        <a href="{{ path('app_location', { 'redirect_to': app.request.uri }) }}" 
+        class="crear-localizacion">
+            Crear una nueva localización
+        </a>
+    </div>
+
+    <div class="campo-form">
+        {{ form_row(form.workLocation) }}
+    </div>
+
+    <button class="btn btn-primary">{{ button_label|default('Guardar') }}</button>
+{{ form_end(form) }}
