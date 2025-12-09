@@ -25,6 +25,12 @@ final class IndexController extends AbstractController
         return $this->render('index/dashboard.html.twig');
     }
 
+    #[Route('/calendar', name: 'app_calendar')]
+    public function calendar(): Response
+    {
+        return $this->render('index/calendar.html.twig');
+    }    
+
     #[Route('/about', name: 'app_about')]
     public function about(): Response
     {
@@ -40,7 +46,8 @@ final class IndexController extends AbstractController
     }
 
 
-    #[Route('/mail', name: 'app_mail')]
+
+    /*#[Route('/mail', name: 'app_mail')]
     public function sendEmail(MailerInterface $mailer): Response
     {
         $email = (new Email())
@@ -58,5 +65,5 @@ final class IndexController extends AbstractController
         $mailer->send($email);
 
         dd($email);
-    }
+    }*/
 }
