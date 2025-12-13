@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -16,9 +17,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 final class PerfilPersonalController extends AbstractController
 {
-
-
-
     #[Route('/perfilpersonal', name: 'perfil_personal_show', methods: ['GET'])]
     public function perfilPersonalShow(PerfilPersonalRepository $perfilPersonalRepository): Response
     {   
@@ -35,7 +33,6 @@ final class PerfilPersonalController extends AbstractController
             'perfil_personal' => $perfilPersonal,
         ]);
     }
-
 
 
     #[Route('/perfilpersonal/new', name: 'perfil_personal_new', methods: ['GET', 'POST'])]
@@ -60,6 +57,7 @@ final class PerfilPersonalController extends AbstractController
             'form' => $form,
         ]);
     }
+
 
 
     #[Route('/perfilpersonal/edit', name: 'perfil_personal_edit', methods: ['GET', 'POST'])]
@@ -89,6 +87,21 @@ final class PerfilPersonalController extends AbstractController
         ]);
     }
 
+
+    #[Route('/perfilpersonal/{id}', name: 'perfil_personal_delete', methods: ['POST'])]
+    public function delete(Request $request, PerfilPersonal $perfilPersonal, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+        if (!$perfilPersonal->getUser() === $this->getUser())
+            throw new AccessDeniedHttpException('No tienes permiso.');
+
+        if ($this->isCsrfTokenValid('delete'.$perfilPersonal->getId(), $request->getPayload()->getString('_token'))) {
+            $entityManager->remove($perfilPersonal);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('app_dashboard', [], Response::HTTP_SEE_OTHER);
+    }    
 
 
 /*
@@ -148,16 +161,5 @@ final class PerfilPersonalController extends AbstractController
         ]);
     }
 */
-    #[Route('/perfilpersonal/{id}', name: 'perfil_personal_delete', methods: ['POST'])]
-    public function delete(Request $request, PerfilPersonal $perfilPersonal, EntityManagerInterface $entityManager): Response
-    {
-        $user = $this->getUser();
-        if ($this->isCsrfTokenValid('delete'.$perfilPersonal->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($perfilPersonal);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('app_dashboard', [], Response::HTTP_SEE_OTHER);
-    }
         
 }

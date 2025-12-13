@@ -1,0 +1,29 @@
+{{ form_start(form) }}
+
+    <div class="mb-3">
+        {{ form_row(form.fechaHora) }}
+    </div>
+
+    <div class="campo-form">
+        {{ form_row(form.plazas) }}
+    </div>
+
+    <div class="campo-form">
+        {{ form_row(form.startLocation) }}
+    </div>
+
+    {# Bloque HTML intercalado #}
+    <div style="margin: 10px 0;" class="small">
+        * Si tu localización no aparece en el desplegable puedes 
+        <a href="{{ path('app_location', { 'redirect_to': app.request.uri }) }}" 
+        class="crear-localizacion">
+            Crear una nueva localización
+        </a>
+    </div>
+
+    <div class="campo-form">
+        {{ form_row(form.endLocation) }}
+    </div>
+
+    <button class="btn btn-primary">{{ button_label|default('Guardar') }}</button>
+{{ form_end(form) }}

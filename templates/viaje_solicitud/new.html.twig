@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Solicitud de Viaje{% endblock %}
+
+{% block body %}
+    <h2>Solicitud de Viaje</h2>
+    {% set viaje = viaje_solicitud.viaje %}
+
+	<table class="table">
+		<tbody>
+			<tr>
+				<th>Conductor/a</th>
+				<td>
+					<div class="avatar-lg">
+						<img src="{{ asset('assets/img/profile_photos/' ~ viaje.conductor.photoFilename ?? 'default_profile_photo.png') }}" alt="image profile" class="avatar-img rounded-circle"/>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>Fecha/Hora de Salida</th>
+				<td>{{ viaje.fechaHora ? viaje.fechaHora|date('Y-m-d H:i:s') : '' }}</td>
+			</tr>
+			<tr>
+				<th>Plazas</th>
+				<td>{{ viaje.plazas }}</td>
+			</tr>
+			<tr>
+				<th>Localización de Origen</th>
+				<td>
+					<a href="{{ path('app_location_show', {'id': viaje.startLocation.id}) }}">
+						{{ viaje.startLocation }}</a>
+				</td>
+			</tr>
+			<tr>
+				<th>Localización de Destino</th>
+				<td>
+					<a href="{{ path('app_location_show', {'id': viaje.endLocation.id}) }}">
+						{{ viaje.endLocation }}</a>
+				</td>
+			</tr>
+			<tr>
+				<th>Ruta</th>
+				<td>
+					<a href="{{ path('app_location_ruta', { home: viaje.startLocation.id, work: viaje.endLocation.id }) }}">
+						Ver ruta en el mapa
+					</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>    
+
+{{ form_start(form) }}
+ <button class="btn btn-success">Solicitar Plaza</button>
+<a href="javascript:history.back()" class="btn btn-danger">Volver</a>
+{{ form_end(form) }}
+{% endblock %}

@@ -30,7 +30,19 @@
                     <li class="feed-item feed-item-info">
                     <a href="{{ path('app_location_index') }}">Mis Localizaciones</a></span>
                     </li>
+                    {#
+                    <li class="feed-item feed-item-info">
+                    <a href="{{ path('perfil_conductor_show') }}">Perfil de Conductor</a></span>
+                    </li>                    
+                    #}
                     {% endif %}
+                    
+                    {#{% if app.user.perfilconductor %}#}
+                    <li class="feed-item feed-item-info">
+                    <a href="{{ path('viajes_usuario') }}">Mis Viajes</a></span>
+                    </li>
+                    {#{% endif %}#}
+                            
                 </ol>
                 </div>
             </div>

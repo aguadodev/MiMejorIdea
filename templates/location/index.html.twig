@@ -29,7 +29,7 @@
                 <td>{{ location.postcode }}</td>
                 <td>{{ location.country }}</td>
                 <td>
-                    <a href="{{ path('app_location_show', {'id': location.id}) }}" class="btn btn-primary">Ver</a>
+                    <a href="{{ path('app_location_show', {'id': location.id}) }}" class="btn btn-primary btn-sm">Ver</a>
                     {#<a href="{{ path('app_location_edit', {'id': location.id}) }}">edit</a>#}
                     {{ include('location/_delete_form.html.twig') }}
                 </td>

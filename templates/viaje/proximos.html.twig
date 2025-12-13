@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Próximos Viajes{% endblock %}
+
+{% block body %}
+    <h2>Próximos Viajes</h2>
+
+	{% if not viajes %}
+		<table id="myTable" class="table">
+			<tr>
+				<td colspan="6">No hay viajes</td>
+			</tr>
+		</table>
+	{% else %}
+    <table id="myTable" class="table">
+        <thead>
+            <tr>
+                <th>FechaHora</th>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Plazas</th>
+                {#
+                <th>CreatedAt</th>
+                <th>UpdatedAt</th>
+                #}
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for viaje in viajes %}
+            <tr>
+                <td>{{ viaje.fechaHora ? viaje.fechaHora|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ viaje.startLocation }}</td>
+                <td>{{ viaje.endLocation }}</td>
+                <td>{{ viaje.plazas }}</td>
+                {#
+                <td>{{ viaje.createdAt ? viaje.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ viaje.updatedAt ? viaje.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+                #}
+                <td>
+                    <a href="{{ path('app_viaje_show', {'id': viaje.id}) }}" class="btn btn-primary btn-sm">Ver</a>
+                    <a href="{{ path('viaje_solicitud_new', {'id': viaje.id}) }}" class="btn btn-success btn-sm">Solicitar</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {# DATATABLES #}
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>    
+    <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
+    <script>
+        let table = new DataTable('#myTable', {
+            // options
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+            },
+            order: [[0, 'desc']]            
+        });
+    </script> 
+    {% endif %}
+
+    <a href="{{ path('app_viaje_new') }}" class="btn btn-primary">Crear Viaje</a>
+
+{% endblock %}

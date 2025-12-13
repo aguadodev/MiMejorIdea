@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Form\ProfileType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,8 +11,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-
+#[IsGranted('ROLE_USER')]
 #[Route('/profile')]
 final class ProfileController extends AbstractController
 {
@@ -24,6 +24,7 @@ final class ProfileController extends AbstractController
             'user' => $this->getUser(),
         ]);
     }
+
 
     #[Route('/edit', name: 'app_profile_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, RegistrationController $rc, SluggerInterface $slugger): Response
@@ -89,6 +90,7 @@ final class ProfileController extends AbstractController
         ]);
     }
 
+
     #[Route('/delete', name: 'app_profile_delete', methods: ['POST'])]
     public function delete(Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): Response
     {
@@ -113,6 +115,7 @@ final class ProfileController extends AbstractController
         return $this->redirectToRoute('app_index', [], Response::HTTP_SEE_OTHER);
     }
 
+    
     #[Route('/resend/email', name: 'app_resend_email')]
     public function resendVerificationEmail(Request $request, RegistrationController $rc): Response
     {

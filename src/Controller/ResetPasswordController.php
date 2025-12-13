@@ -30,6 +30,7 @@ class ResetPasswordController extends AbstractController
     ) {
     }
 
+
     /**
      * Display & process form to request a password reset.
      */
@@ -52,6 +53,7 @@ class ResetPasswordController extends AbstractController
         ]);
     }
 
+
     /**
      * Confirmation page after a user has requested a password reset.
      */
@@ -68,6 +70,7 @@ class ResetPasswordController extends AbstractController
             'resetToken' => $resetToken,
         ]);
     }
+
 
     /**
      * Validates and process the reset URL that the user clicked in their email.
@@ -130,6 +133,7 @@ class ResetPasswordController extends AbstractController
         ]);
     }
 
+    
     private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer): RedirectResponse
     {
         $user = $this->entityManager->getRepository(User::class)->findOneBy([

@@ -28,12 +28,38 @@
 		<div class="sidebar-content">
 			<ul class="nav nav-secondary">
 
+			{# PANEL DE CONTROL #}
               <li class="nav-item">
                 <a href="{{ path('app_dashboard') }}">
                   <i class="fas fa-home"></i>
                   <p>Panel de Control</p>
                 </a>
               </li>
+
+
+			{# COCHE COMPARTIDO #}
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#car">
+                  <i class="fas fa-car"></i>
+                  <p>Coche compartido</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="car">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="{{ path('viajes_proximos')}}">
+                        <span class="sub-item">Próximos viajes</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{{ path('app_viaje_new')}}">
+                        <span class="sub-item">Crear viaje</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
 
 			</ul>
 		</div>

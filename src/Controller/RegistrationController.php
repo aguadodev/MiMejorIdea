@@ -59,6 +59,11 @@ class RegistrationController extends AbstractController
         ]);
     }
 
+
+    /**
+     * Envía email de verificación del correo electrónico
+     * Utilizado en el registro de usuario y al modificar el valor del email
+     */
     public function sendEmailConfirmation(User $user)
     {
         // generate a signed url and email it to the user
@@ -79,6 +84,7 @@ class RegistrationController extends AbstractController
     {
         $id = $request->query->get('id');
 
+        // Si no hay solicitud 
         if (null === $id) {
             return $this->redirectToRoute('app_register');
         }

@@ -43,7 +43,7 @@ class Location
 
     public function __toString(): string
     {
-        return $this->address ?? '';
+        return ($this->street . ", " ?? '') . ($this->city ?? '');
     }
 
     // -----------------------

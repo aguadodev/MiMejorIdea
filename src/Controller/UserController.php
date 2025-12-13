@@ -12,7 +12,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-
+/**
+ * Controlador pendiente de revisión para implementar un panel de administración de usuarios.
+ */
 #[IsGranted('ROLE_ADMIN')]
 #[Route('/user')]
 final class UserController extends AbstractController

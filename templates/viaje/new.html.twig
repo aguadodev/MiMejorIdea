@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Crear Viaje{% endblock %}
+
+{% block body %}
+    <h1>Crear Viaje</h1>
+
+    {{ include('viaje/_form.html.twig') }}
+
+<a href="javascript:history.back()" class="btn btn-danger">Volver</a>
+{% endblock %}
