@@ -1,0 +1,47 @@
+{% extends 'base_email.html.twig' %}
+
+{% block subject %}
+	Solicitud de plaza aceptada
+{% endblock %}
+
+{% block body %}
+	<p>
+		Hola
+		<strong>{{ viajeSolicitud.pasajero.username }}</strong>,
+	</p>
+
+	<p>
+		Tu solicitud de plaza en el siguiente viaje ha sido 
+		<strong>aceptada</strong>:
+	</p>
+
+	<ul>
+		<li>
+			<strong>Ruta:</strong>
+			{{ viajeSolicitud.viaje.startLocation }}
+			→
+			{{ viajeSolicitud.viaje.endLocation }}
+		</li>
+		<li>
+			<strong>Fecha y hora:</strong>
+			{{ viajeSolicitud.viaje.fechaHora|date('d/m/Y H:i') }}
+		</li>
+		<li>
+			<strong>Conductor/a:</strong>
+			{{ viajeSolicitud.viaje.conductor.username }}
+		</li>
+		<li>
+			<strong>Fecha de la solicitud:</strong>
+			{{ viajeSolicitud.createdAt|date('d/m/Y H:i') }}
+		</li>
+	</ul>
+
+	<p style="margin-top: 20px; font-size: 13px; color: #666;">
+		Recuerda ser puntual.
+	</p>
+
+	<p>
+		Gracias por usar
+		<strong>Mi Mejor Idea</strong>.
+	</p>
+{% endblock %}

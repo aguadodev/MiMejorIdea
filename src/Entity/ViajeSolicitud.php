@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\ViajeSolicitudEstado;
 use App\Repository\ViajeSolicitudRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -24,11 +25,41 @@ class ViajeSolicitud
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\Column(enumType: ViajeSolicitudEstado::class)]
+    private ?ViajeSolicitudEstado $estado = null;
+
+    #[ORM\Column(length: 64)]
+    private ?string $token = null;
+
     public function __construct()
     {
         // Inicializa la fecha creación al momento actual
         $this->createdAt = new \DateTimeImmutable();
+        // Genera un token para aceptar o rechazar la solicitud desde el mail con seguridad
+        $this->token = bin2hex(random_bytes(32));
+        // Inicializa el estado de una nueva solicitud a PENDIENTE
+        $this->estado = ViajeSolicitudEstado::PENDIENTE;
     }
+
+
+    public function aceptar(): void
+    {
+        if ($this->estado !== ViajeSolicitudEstado::PENDIENTE) {
+            throw new \LogicException('La solicitud ya ha sido procesada.');
+        }
+
+        $this->estado = ViajeSolicitudEstado::ACEPTADA;
+    }
+
+    public function rechazar(): void
+    {
+        if ($this->estado !== ViajeSolicitudEstado::PENDIENTE) {
+            throw new \LogicException('La solicitud ya ha sido procesada.');
+        }
+
+        $this->estado = ViajeSolicitudEstado::RECHAZADA;
+    }
+
 
     public function getId(): ?int
     {
@@ -67,6 +98,45 @@ class ViajeSolicitud
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getEstado(): ?ViajeSolicitudEstado
+    {
+        return $this->estado;
+    }
+
+    public function setEstado(ViajeSolicitudEstado $estado): static
+    {
+        $this->estado = $estado;
+
+        return $this;
+    }
+
+    public function isPendiente(): bool
+    {
+        return $this->estado == ViajeSolicitudEstado::PENDIENTE;
+    }
+
+    public function isAceptada(): bool
+    {
+        return $this->estado == ViajeSolicitudEstado::ACEPTADA;
+    }
+
+    public function isRechazada(): bool
+    {
+        return $this->estado == ViajeSolicitudEstado::RECHAZADA;
+    }
+
+    public function getToken(): ?string
+    {
+        return $this->token;
+    }
+
+    public function setToken(string $token): static
+    {
+        $this->token = $token;
 
         return $this;
     }

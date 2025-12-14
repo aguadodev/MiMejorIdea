@@ -21,10 +21,6 @@
 				<td>{{ viaje.fechaHora ? viaje.fechaHora|date('Y-m-d H:i:s') : '' }}</td>
 			</tr>
 			<tr>
-				<th>Plazas</th>
-				<td>{{ viaje.plazas }}</td>
-			</tr>
-			<tr>
 				<th>Localización de Origen</th>
 				<td>
 					<a href="{{ path('app_location_show', {'id': viaje.startLocation.id}) }}">
@@ -46,6 +42,32 @@
 					</a>
 				</td>
 			</tr>
+			<tr>
+				<th>Plazas</th>
+				<td>{{ viaje.plazas }}</td>
+			</tr>
+				<th>Solicitudes</th>
+				<td>
+				
+				{% for solicitud in viaje.solicitudes %}
+					{% if solicitud.isPendiente %}
+						<div class="avatar avatar-away">
+					{% elseif solicitud.isAceptada %}
+						<div class="avatar avatar-online">
+					{% elseif solicitud.isRechazada %}
+						<div class="avatar avatar-offline">
+					{% endif %}					
+						<a href="{{ path('app_viaje_solicitud_show', {'id': solicitud.id}) }}">
+						<img src="{{ asset('assets/img/profile_photos/' ~ solicitud.pasajero.photoFilename ?? 'default_profile_photo.png') }}" alt="image profile" class="avatar-img rounded-circle"/>
+						</a>
+					</div>
+				{% else %}
+					No hay solicitudes de pasajeros/as.
+				{% endfor %}
+				
+				</td>
+			<tr>
+			</tr>			
 			<tr>
 				<th>CreatedAt</th>
 				<td>{{ viaje.createdAt ? viaje.createdAt|date('Y-m-d H:i:s') : '' }}</td>

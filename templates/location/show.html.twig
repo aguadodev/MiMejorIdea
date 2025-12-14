@@ -9,6 +9,9 @@
 
     <table class="table">
         <tbody>
+        {% if location.user is null or (location.user is same as(app.user)) %}
+            {# Datos privados de la localización que sólo el creador puede ver  #}
+        {% endif %}
             <tr>
                 <th>Dirección</th>
                 <td>{{ location.address }}</td>

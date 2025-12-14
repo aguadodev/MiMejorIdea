@@ -1,0 +1,72 @@
+{% extends 'base_email.html.twig' %}
+
+{% block subject %}
+	Nueva solicitud de plaza
+{% endblock %}
+
+{% block body %}
+	<p>
+		Hola
+		<strong>{{ viajeSolicitud.viaje.conductor.username }}</strong>,
+	</p>
+
+	<p>
+		Has recibido una nueva
+		<strong>solicitud de plaza</strong>
+		para el siguiente viaje:
+	</p>
+
+	<ul>
+		<li>
+			<strong>Ruta:</strong>
+			{{ viajeSolicitud.viaje.startLocation }}
+			→
+			{{ viajeSolicitud.viaje.endLocation }}
+		</li>
+		<li>
+			<strong>Fecha y hora:</strong>
+			{{ viajeSolicitud.viaje.fechaHora|date('d/m/Y H:i') }}
+		</li>
+		<li>
+			<strong>Pasajero/a solicitante:</strong>
+			{{ viajeSolicitud.pasajero.email }}
+		</li>
+		<li>
+			<strong>Fecha de la solicitud:</strong>
+			{{ viajeSolicitud.createdAt|date('d/m/Y H:i') }}
+		</li>
+	</ul>
+
+	<p style="margin-top: 30px;">
+		Gestiona la solicitud:
+	</p>
+
+	<table cellpadding="0" cellspacing="0">
+		<tr>
+			<td>
+				<a href="{{ url('viaje_solicitud_aceptar', { id: viajeSolicitud.id, token: viajeSolicitud.token }) }}" style="display:inline-block; padding:10px 16px; background-color:#28a745; color:#ffffff; text-decoration:none; border-radius:4px;">
+					Aceptar
+				</a>
+			</td>
+			<td width="10"></td>
+			<td>
+				<a href="{{ url('viaje_solicitud_rechazar', { id: viajeSolicitud.id, token: viajeSolicitud.token }) }}" style="display:inline-block; padding:10px 16px; background-color:#dc3545; color:#ffffff; text-decoration:none; border-radius:4px;">
+					Rechazar
+				</a>
+			</td>
+		</tr>
+	</table>
+
+	<p style="margin-top: 20px; font-size: 13px; color: #666;">
+		Puedes gestionar esta solicitud accediendo a la aplicación.
+	</p>
+
+	<p style="margin-top: 20px; font-size: 13px; color: #666;">
+		Si no reconoces esta solicitud, ignora este correo.
+	</p>
+
+	<p>
+		Gracias por usar
+		<strong>Mi Mejor Idea</strong>.
+	</p>
+{% endblock %}

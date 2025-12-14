@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Viaje;
 use App\Form\ViajeType;
 use App\Repository\ViajeRepository;
+use App\Service\Redirector;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,6 +17,9 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/viaje')]
 final class ViajeController extends AbstractController
 {
+    use Helper; // trait con código reutilizable para controladores
+
+    
     #[Route(name: 'viajes_proximos', methods: ['GET'])]
     public function viajesProximos(ViajeRepository $viajeRepository): Response
     {
@@ -42,10 +46,10 @@ final class ViajeController extends AbstractController
         $user = $this->getUser();
 
         if (!$user->isVerified()) {
-            $this->addFlash('warning', 'Debes verificar a túa conta para acceder a esta funcionalidade. <a href="' . $this->generateUrl('app_resend_email') . '">Verificar agora</a>');
-
-            return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_index'));
+            $message = 'Debes verificar tu cuenta para acceder a esta funcionalidad. <a href="' . $this->generateUrl('app_resend_email') . '">Verificar ahora</a>';
+            return $this->denyAndBack($request, $message);
         }
+
         $viaje = new Viaje();
         $viaje->setConductor($user);
         if ($user->getPerfilPersonal() != null) {
@@ -63,7 +67,6 @@ final class ViajeController extends AbstractController
 
             // TODO Crear Perfil de Conductor??
             return $this->redirectToRoute('viajes_usuario', [], Response::HTTP_SEE_OTHER);
-            //return $this->redirectToRoute('viajes_usuario', ['id' => $viaje->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('viaje/new.html.twig', [

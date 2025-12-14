@@ -70,9 +70,6 @@ final class LocationController extends AbstractController
     #[Route('/{id}', name: 'app_location_show', methods: ['GET'])]
     public function show(Location $location): Response
     {
-        if (!($location->getUser() === null || $location->getUser() === $this->getUser()))
-            throw new AccessDeniedHttpException('No tienes permiso.');
-
         return $this->render('location/show.html.twig', [
             'location' => $location,
         ]);
