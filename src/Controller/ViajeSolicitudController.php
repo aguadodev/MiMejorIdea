@@ -37,8 +37,9 @@ final class ViajeSolicitudController extends AbstractController
 
 
     #[Route('/{id}', name: 'viaje_solicitud_new', methods: ['GET', 'POST'])]
-    public function nuevaSolicitud(Viaje $viaje, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    public function nuevaSolicitud(Viaje $viaje, Request $request, EntityManagerInterface $entityManager, Mail $mail): Response
     {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $now = new \DateTimeImmutable();
 
@@ -51,6 +52,7 @@ final class ViajeSolicitudController extends AbstractController
             return $this->denyAndBack($request, 'No puedes solicitar un viaje del que eres conductor.');
         }
 
+        // @TODO Innecesario: Los usuarios deben estar verificados para iniciar sesión
         if (!$user->isVerified()) {
             $message = 'Debes verificar tu cuenta para acceder a esta funcionalidad. <a href="' . $this->generateUrl('app_resend_email') . '">Verificar ahora</a>';
             return $this->denyAndBack($request, $message);
@@ -64,7 +66,7 @@ final class ViajeSolicitudController extends AbstractController
             }
         }
 
-        /* TODO
+        /* @TODO
         if ($viaje->estaCompleto()) {
             return $this->denyAndBack($request, 'El viaje ya está completo.');
         }*/
@@ -81,7 +83,6 @@ final class ViajeSolicitudController extends AbstractController
             $entityManager->flush();
 
             // Enviar notificación por mail al conductor
-            $mail = new Mail($mailer);
             $mail->enviarMailSolicitudViaje($viajeSolicitud);
 
             return $this->redirectToRoute('app_viaje_show', ['id' => $viaje->getId()], Response::HTTP_SEE_OTHER);
@@ -95,7 +96,7 @@ final class ViajeSolicitudController extends AbstractController
 
 
     #[Route('/solicitud/{id}/aceptar/{token}', name: 'viaje_solicitud_aceptar')]
-    public function aceptar(ViajeSolicitud $solicitud, string $token, EntityManagerInterface $em): Response
+    public function aceptar(ViajeSolicitud $solicitud, string $token, EntityManagerInterface $em, Mail $mail): Response
     {
         if ($solicitud->getToken() !== $token) {
             throw $this->createAccessDeniedException();
@@ -110,7 +111,6 @@ final class ViajeSolicitudController extends AbstractController
         $em->flush();
 
         // Enviar notificación por mail al pasajero
-        $mail = new Mail($this->mailer);
         $mail->enviarMailSolicitudViajeAceptada($solicitud);
 
         $this->addFlash('success', 'Solicitud aceptada correctamente.');
@@ -134,8 +134,7 @@ final class ViajeSolicitudController extends AbstractController
         $solicitud->rechazar();
         $em->flush();
 
-        // TODO Enviar notificación por mail al pasajero
-        //$mail = new Mail($this->mailer);
+        // @TODO Enviar notificación por mail al pasajero
         //$mail->enviarMailSolicitudViajeAceptada($solicitud);        
 
         $this->addFlash('success', 'Solicitud rechazada correctamente.');
@@ -221,7 +220,7 @@ final class ViajeSolicitudController extends AbstractController
     }
         */
 
-    // Métodos auxiliares // TODO Reutilizar en otros controladores
+    // Métodos auxiliares // @TODO Reutilizar en otros controladores
     /* private function denyAndBack(Request $request, string $message, string $type = 'warning'): Response
     {
         $this->addFlash($type, $message);

@@ -7,6 +7,7 @@ use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Http\Event\CheckPassportEvent;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use App\Entity\User;
 
 
 
@@ -35,9 +36,13 @@ class LoginSubscriber implements EventSubscriberInterface
     {
         // Obtiene el usuario que intenta iniciar sesión
         $user = $event->getPassport()->getUser();
+        // Si el usuario no está verificado lanzamos una excepción
+        if (!$user->isVerified()) {
+            throw new AuthenticationException();
+        }
         // Si el usuario no está habilitado lanzamos una excepción
         if (!$user->isEnabled()) {
-            throw new AuthenticationException('Usuario deshabilitado');
+            throw new AuthenticationException();
         }
     }
 

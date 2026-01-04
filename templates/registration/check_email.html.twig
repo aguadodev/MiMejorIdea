@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mi Mejor Idea - Email de verificación enviado{% endblock %}
+
+{% block body %}
+    <h2>Email de verificación enviado!</h2>
+        <p>
+            Si existe una cuenta con la dirección de correo indicada, entonces se habrá enviado un mensaje con un enlace
+            para verificar la dirección de correo.
+        </p>
+        <p>Si no recibes el mensaje comprueba la bandeja de spam o <a href="{{ path('app_resend_verification_email') }}">inténtalo de nuevo</a>.</p>
+{% endblock %}

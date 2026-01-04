@@ -58,6 +58,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?PerfilPersonal $perfilPersonal = null;
 
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $newEmail = null;
+
 
     public function __construct()
     {
@@ -69,6 +72,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles[] = 'ROLE_USER';
     }
 
+    public function __toString(): string
+    {
+        return $this->username ?? $this->email;
+    }
 
 
     public function getId(): ?int
@@ -249,6 +256,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->perfilPersonal = $perfilPersonal;
+
+        return $this;
+    }
+
+    public function getNewEmail(): ?string
+    {
+        return $this->newEmail;
+    }
+
+    public function setNewEmail(?string $newEmail): static
+    {
+        $this->newEmail = $newEmail;
 
         return $this;
     }

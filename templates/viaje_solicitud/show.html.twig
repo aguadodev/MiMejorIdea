@@ -1,26 +1,26 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}ViajeSolicitud{% endblock %}
+{% block title %}Viaje Solicitud{% endblock %}
 
 {% block body %}
-    <h2>ViajeSolicitud</h2>
-    {# TODO: Revisar contenido
+    <h2>Viaje Solicitud</h2>
+    {# @TODO: Revisar contenido
         - Añadir botones para aceptar o rechazar el estado de la solicitud si aún está pendiente
     #}
     <table class="table">
         <tbody>
             <tr>
-                <th>Id</th>
-                <td>{{ viaje_solicitud.id }}</td>
+                <th>Pasajero/a</th>
+                <td>{{ viaje_solicitud.pasajero }}</td>
             </tr>
             <tr>
-                <th>CreatedAt</th>
+                <th>Created At</th>
                 <td>{{ viaje_solicitud.createdAt ? viaje_solicitud.createdAt|date('Y-m-d H:i:s') : '' }}</td>
             </tr>
         </tbody>
     </table>
 
-    <a href="javascript:history.back()">back to list</a>
+    <a href="javascript:history.back()">Volver</a>
 
     {#<a href="{{ path('app_viaje_solicitud_edit', {'id': viaje_solicitud.id}) }}">edit</a>
 

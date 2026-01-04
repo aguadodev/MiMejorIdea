@@ -1,0 +1,14 @@
+email_verified: O teu correo electrónico foi verificado correctamente.
+verification_resent_generic: >
+  Se existe unha conta asociada a este correo e está pendente de verificación,
+  enviarase unha mensaxe nos próximos minutos.
+password_reset_requested: >
+  Se existe unha conta asociada a este correo,
+  recibirás unha mensaxe coas instrucións para restablecer o contrasinal.
+password_reset_expired: A ligazón para restablecer o contrasinal xa non é válida.
+mail_verification_sent: Enviouse unha mensaxe para verificar a túa nova dirección de correo electrónico.
+new_mail_verification_sent: >
+  Enviouse unha mensaxe para verificar a túa nova dirección de correo electrónico. 
+  Deberás verifica-la dirección para que o cambio se faga efectivo.
+mail_verified: Verificouse o teu correo electrónico.
+profile_photo_upload_error: Erro ao subir a foto de perfil

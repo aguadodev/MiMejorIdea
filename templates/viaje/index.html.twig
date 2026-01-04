@@ -19,9 +19,9 @@
 					<th>Origen</th>
 					<th>Destino</th>
 					<th>Plazas</th>
-					<th>CreatedAt</th>
-					<th>UpdatedAt</th>
-					<th>actions</th>
+					{#<th>CreatedAt</th>
+					<th>UpdatedAt</th>#}
+					<th>Acciones</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -31,8 +31,8 @@
 						<td>{{ viaje.startLocation }}</td>
 						<td>{{ viaje.endLocation }}</td>
 						<td>{{ viaje.plazas }}</td>
-						<td>{{ viaje.createdAt ? viaje.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-						<td>{{ viaje.updatedAt ? viaje.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+						{#<td>{{ viaje.createdAt ? viaje.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+						<td>{{ viaje.updatedAt ? viaje.updatedAt|date('Y-m-d H:i:s') : '' }}</td>#}
 						<td>
 							<a href="{{ path('app_viaje_show', {'id': viaje.id}) }}" class="btn btn-primary btn-sm">Ver</a>
                             {% if viaje.fechaHora > date() %}

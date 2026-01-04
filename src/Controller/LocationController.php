@@ -83,7 +83,7 @@ final class LocationController extends AbstractController
             throw new AccessDeniedHttpException('No tienes permiso.');
 
         if ($this->isCsrfTokenValid('delete' . $location->getId(), $request->getPayload()->getString('_token'))) {
-            // TODO - Comprobar si la localización se está usando para evitar errores de integridad referencial
+            // @TODO - Comprobar si la localización se está usando para evitar errores de integridad referencial
             $entityManager->remove($location);
             $entityManager->flush();
         }

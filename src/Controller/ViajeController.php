@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Viaje;
 use App\Form\ViajeType;
 use App\Repository\ViajeRepository;
-use App\Service\Redirector;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,6 +42,7 @@ final class ViajeController extends AbstractController
     #[Route('/new', name: 'app_viaje_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
         if (!$user->isVerified()) {
@@ -65,7 +65,7 @@ final class ViajeController extends AbstractController
             $entityManager->persist($viaje);
             $entityManager->flush();
 
-            // TODO Crear Perfil de Conductor??
+            // @TODO Crear Perfil de Conductor??
             return $this->redirectToRoute('viajes_usuario', [], Response::HTTP_SEE_OTHER);
         }
 

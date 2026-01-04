@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Form\EmailFormType;
 use App\Form\ProfileType;
+use App\Service\Mail;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,10 +16,10 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_USER')]
 #[Route('/profile')]
 final class ProfileController extends AbstractController
 {
+    #[IsGranted('ROLE_USER')]
     #[Route('/', name: 'app_profile_show', methods: ['GET'])]
     public function show(): Response
     {
@@ -25,10 +28,11 @@ final class ProfileController extends AbstractController
         ]);
     }
 
-
+    #[IsGranted('ROLE_USER')]
     #[Route('/edit', name: 'app_profile_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, EntityManagerInterface $entityManager, RegistrationController $rc, SluggerInterface $slugger): Response
+    public function edit(Request $request, EntityManagerInterface $entityManager, Mail $mail, SluggerInterface $slugger): Response
     {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $form = $this->createForm(ProfileType::class, $user);
         $form->handleRequest($request);
@@ -39,24 +43,24 @@ final class ProfileController extends AbstractController
                 $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
                 // this is needed to safely include the file name as part of the URL
                 $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$photoFile->guessExtension();
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
 
                 // Move the file to the directory where photos are stored
                 try {
-                    
+
                     $photoFile->move(
                         $this->getParameter('profile_photos_directory'),
                         $newFilename
                     );
                 } catch (FileException $e) {
                     // ... handle exception if something happens during file upload
-                    $this->addFlash('error', 'Error al subir la foto de perfil');
+                    $this->addFlash('error', 'profile_photo_upload_error');
                 }
-                
+
                 // Borra el fichero de imagen de perfil anterior si existe
                 if ($user->getPhotoFilename()) {
                     $oldPhoto = $user->getPhotoFilename();
-                    $photoPath = $this->getParameter('profile_photos_directory').'/'.$oldPhoto;
+                    $photoPath = $this->getParameter('profile_photos_directory') . '/' . $oldPhoto;
                     if (file_exists($photoPath)) {
                         unlink($photoPath);
                     }
@@ -69,16 +73,16 @@ final class ProfileController extends AbstractController
             //dd($user->getEmail() . " - " . $form->get('oldEmail')->getData());
             // Comprueba si se ha modificado el email
             if ($user->getEmail() != $form->get('oldEmail')->getData()) {
-                // Cambia el estado de verificado a falso
-                $user->setIsVerified(false);
                 // Envía un email de confirmación al nuevo email
-                $rc->sendEmailConfirmation($user);    
-                // e Informa al usuario con un mensaje flash
-                $this->addFlash('success', 'Se ha enviado un email de confirmación a tu nuevo email');
-            }       
+                $mail->sendEmailConfirmation($user);
+                // Mantiene el email original hasta que se verifique y guarda el nuevo en un nuevo campo.
+                $user->setNewEmail($user->getEmail());
+                $user->setEmail($form->get('oldEmail')->getData());
+                $this->addFlash('success', 'new_mail_verification_sent');
+            }
 
             // Actualiza la fecha de modificación
-            $user->setUpdatedAt(new \DateTime());              
+            $user->setUpdatedAt(new \DateTime());
             $entityManager->flush();
 
             return $this->redirectToRoute('app_profile_show', [], Response::HTTP_SEE_OTHER);
@@ -90,20 +94,21 @@ final class ProfileController extends AbstractController
         ]);
     }
 
-
+    #[IsGranted('ROLE_USER')]
     #[Route('/delete', name: 'app_profile_delete', methods: ['POST'])]
     public function delete(Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): Response
     {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        if ($this->isCsrfTokenValid('delete' . $this->getUser()->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->getPayload()->getString('_token'))) {
             // Borra el fichero de foto de perfil si existe
             if ($user->getPhotoFilename()) {
-                $photoPath = $this->getParameter('profile_photos_directory').'/'.$user->getPhotoFilename();
+                $photoPath = $this->getParameter('profile_photos_directory') . '/' . $user->getPhotoFilename();
                 if (file_exists($photoPath)) {
                     unlink($photoPath);
                 }
             }
-            
+
             // Cerrar sesión (Logout) => invalidate session
             $request->getSession()->invalidate();
             $tokenStorage->setToken(null);
@@ -115,18 +120,59 @@ final class ProfileController extends AbstractController
         return $this->redirectToRoute('app_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    
+    #[IsGranted('ROLE_USER')]
     #[Route('/resend/email', name: 'app_resend_email')]
-    public function resendVerificationEmail(Request $request, RegistrationController $rc): Response
+    public function resendVerificationEmail(Mail $mail): Response
     {
         $user = $this->getUser();
 
         // Envía un email de confirmación al nuevo email
-        $rc->sendEmailConfirmation($user);
+        $mail->sendEmailConfirmation($user);
 
         // e Informa al usuario con un mensaje flash
-        $this->addFlash('success', 'Se ha enviado un mensaje para verificar tu dirección de correo electrónico.');
-
+        $this->addFlash('success', 'mail_verification_sent');
+        
         return $this->redirectToRoute('app_profile_show', [], Response::HTTP_SEE_OTHER);
     }
+
+    #[Route('/resend/emailform', name: 'app_resend_verification_email')]
+    public function resendVerificationEmailForm(Request $request, EntityManagerInterface $entityManager, Mail $mail): Response
+    {
+        $form = $this->createForm(EmailFormType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var string $email */
+            $email = $form->get('email')->getData();
+
+            $user = $entityManager->getRepository(User::class)->findOneBy([
+                'email' => $email,
+            ]);
+            if ($user) {
+                // Envía un email de confirmación al nuevo email
+                $mail->sendEmailConfirmation($user);
+            }
+            return $this->redirectToRoute('app_check_verification_email');
+
+
+            return $this->processSendingPasswordResetEmail(
+                $email,
+                $mail
+            );
+        }
+
+        return $this->render('registration/resend_verification_email.html.twig', [
+            'requestForm' => $form,
+        ]);
+    }
+
+    /**
+     * Confirmation page after a user has requested a verification link.
+     */
+    #[Route('/check-verification-email', name: 'app_check_verification_email')]
+    public function checkEmail(): Response
+    {
+        return $this->render('registration/check_email.html.twig');
+    }
+
 }

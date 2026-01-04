@@ -92,7 +92,7 @@ final class PerfilPersonalController extends AbstractController
     public function delete(Request $request, PerfilPersonal $perfilPersonal, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
-        if (!$perfilPersonal->getUser() === $this->getUser())
+        if (!$perfilPersonal->getUser() === $user)
             throw new AccessDeniedHttpException('No tienes permiso.');
 
         if ($this->isCsrfTokenValid('delete'.$perfilPersonal->getId(), $request->getPayload()->getString('_token'))) {
