@@ -30,7 +30,7 @@ class Mail {
             (new TemplatedEmail())
                 ->from(new Address('compartirmimejoridea@gmail.com', 'Mi Mejor Idea'))
                 ->to((string) $user->getEmail())
-                ->subject('Verifica tu Correo Electrónico')
+                ->subject('💡 Verifica tu Correo Electrónico')
                 ->htmlTemplate('registration/confirmation_email.html.twig')
         );
     }
@@ -41,7 +41,7 @@ class Mail {
         $email = (new TemplatedEmail())
             ->from(new Address('compartirmimejoridea@gmail.com', 'Mi Mejor Idea'))
             ->to((string) $user->getEmail())
-            ->subject('Resetea tu contraseña')
+            ->subject('💡 Resetea tu contraseña')
             ->htmlTemplate('reset_password/email.html.twig')
             ->context([
                 'resetToken' => $resetToken,
@@ -56,7 +56,7 @@ class Mail {
         $email = (new TemplatedEmail())
             ->from(new Address('compartirmimejoridea@gmail.com', 'Mi Mejor Idea'))
             ->to((string) $viajeSolicitud->getViaje()->getConductor()->getEmail())
-            ->subject('Solicitud de Viaje')
+            ->subject('💡 Solicitud de Viaje')
             ->htmlTemplate('viaje_solicitud/email_solicitud.html.twig')
             ->context([
                 'viajeSolicitud' => $viajeSolicitud,
@@ -70,7 +70,7 @@ class Mail {
         $email = (new TemplatedEmail())
             ->from(new Address('compartirmimejoridea@gmail.com', 'Mi Mejor Idea'))
             ->to((string) $viajeSolicitud->getViaje()->getConductor()->getEmail())
-            ->subject('Solicitud de Viaje Aceptada!')
+            ->subject('💡 Solicitud de Viaje Aceptada!')
             ->htmlTemplate('viaje_solicitud/email_solicitud_aceptada.html.twig')
             ->context([
                 'viajeSolicitud' => $viajeSolicitud,

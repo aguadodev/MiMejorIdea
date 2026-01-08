@@ -45,8 +45,8 @@ final class ViajeController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        if (!$user->isVerified()) {
-            $message = 'Debes verificar tu cuenta para acceder a esta funcionalidad. <a href="' . $this->generateUrl('app_resend_email') . '">Verificar ahora</a>';
+        if (!$user->getUsername()) {
+            $message = 'Necesitas un nombre de usuario público para interactuar con usuari@s. <a href="' . $this->generateUrl('app_profile_edit') . '">Edita tu perfil</a>';
             return $this->denyAndBack($request, $message);
         }
 
@@ -62,6 +62,7 @@ final class ViajeController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $viaje->setConductor($user);
+            
             $entityManager->persist($viaje);
             $entityManager->flush();
 

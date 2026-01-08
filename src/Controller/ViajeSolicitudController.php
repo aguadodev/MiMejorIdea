@@ -44,18 +44,17 @@ final class ViajeSolicitudController extends AbstractController
         $now = new \DateTimeImmutable();
 
         // Comprobar si se puede solicitar el viaje.
+        if (!$user->getUsername()) {
+            $message = 'Necesitas un nombre de usuario público para interactuar con usuari@s. <a href="' . $this->generateUrl('app_profile_edit') . '">Edita tu perfil</a>';
+            return $this->denyAndBack($request, $message);
+        }
+
         if ($viaje->getFechaHora() <= $now) {
             return $this->denyAndBack($request, 'No se puede solicitar un viaje que ya pasó.');
         }
 
         if ($viaje->getConductor() === $user) {
             return $this->denyAndBack($request, 'No puedes solicitar un viaje del que eres conductor.');
-        }
-
-        // @TODO Innecesario: Los usuarios deben estar verificados para iniciar sesión
-        if (!$user->isVerified()) {
-            $message = 'Debes verificar tu cuenta para acceder a esta funcionalidad. <a href="' . $this->generateUrl('app_resend_email') . '">Verificar ahora</a>';
-            return $this->denyAndBack($request, $message);
         }
 
         /* Si el usuario ya ha solicitado este viaje no puede solicitarlo de nuevo */
@@ -66,7 +65,7 @@ final class ViajeSolicitudController extends AbstractController
             }
         }
 
-        /* @TODO
+        /* @TODO Si el viaje está completo...
         if ($viaje->estaCompleto()) {
             return $this->denyAndBack($request, 'El viaje ya está completo.');
         }*/
@@ -84,7 +83,7 @@ final class ViajeSolicitudController extends AbstractController
 
             // Enviar notificación por mail al conductor
             $mail->enviarMailSolicitudViaje($viajeSolicitud);
-
+            $this->addFlash('success', 'Viaje solicitado correctamente.');
             return $this->redirectToRoute('app_viaje_show', ['id' => $viaje->getId()], Response::HTTP_SEE_OTHER);
         }
 
@@ -134,8 +133,8 @@ final class ViajeSolicitudController extends AbstractController
         $solicitud->rechazar();
         $em->flush();
 
-        // @TODO Enviar notificación por mail al pasajero
-        //$mail->enviarMailSolicitudViajeAceptada($solicitud);        
+        // @TODO Enviar notificación por mail al pasajero o rechazo silencioso??
+        //$mail->enviarMailSolicitudViajeRechazada($solicitud);        
 
         $this->addFlash('success', 'Solicitud rechazada correctamente.');
 

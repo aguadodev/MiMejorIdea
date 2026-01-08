@@ -34,10 +34,21 @@ final class ProfileController extends AbstractController
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $form = $this->createForm(ProfileType::class, $user);
-        $form->handleRequest($request);
+        // Clonamos el usuario para recuperar los datos originales si el formulario no es válido
+        $originalUser = clone $user;
 
+        $form = $this->createForm(ProfileType::class, $originalUser);
+        $form->handleRequest($request);
+        // Si se intenta borrar el nombre de usuario ya creado
+        /*if ($originalUser->getUsername() !== null && $user->getUsername() === null) {
+            $this->addFlash('error', 'No se puede eliminar el nombre de usuario una vez creado.');
+            return $this->redirectToRoute('app_profile_edit');
+        }*/
         if ($form->isSubmitted() && $form->isValid()) {
+            // Si el formulario es válido copiamos los datos modificados al $user que persistiremos en la BD
+            $user->setEmail($originalUser->getEmail());
+            $user->setUsername($originalUser->getUsername());
+
             $photoFile = $form->get('photo')->getData();
             if ($photoFile) {
                 $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
@@ -70,7 +81,6 @@ final class ProfileController extends AbstractController
                 $user->setPhotoFilename($newFilename);
             }
 
-            //dd($user->getEmail() . " - " . $form->get('oldEmail')->getData());
             // Comprueba si se ha modificado el email
             if ($user->getEmail() != $form->get('oldEmail')->getData()) {
                 // Envía un email de confirmación al nuevo email
@@ -89,7 +99,7 @@ final class ProfileController extends AbstractController
         }
 
         return $this->render('profile/edit.html.twig', [
-            'user' => $this->getUser(),
+            'user' => $user,
             'form' => $form,
         ]);
     }
@@ -131,7 +141,7 @@ final class ProfileController extends AbstractController
 
         // e Informa al usuario con un mensaje flash
         $this->addFlash('success', 'mail_verification_sent');
-        
+
         return $this->redirectToRoute('app_profile_show', [], Response::HTTP_SEE_OTHER);
     }
 
@@ -174,5 +184,4 @@ final class ProfileController extends AbstractController
     {
         return $this->render('registration/check_email.html.twig');
     }
-
 }

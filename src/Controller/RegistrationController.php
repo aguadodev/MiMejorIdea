@@ -59,25 +59,6 @@ class RegistrationController extends AbstractController
     }
 
 
-    /**
-     * Envía email de verificación del correo electrónico
-     * Utilizado en el registro de usuario y al modificar el valor del email
-     */
-/*    public function sendEmailConfirmation(User $user)
-    {
-        // generate a signed url and email it to the user
-        $this->emailVerifier->sendEmailConfirmation(
-            'app_verify_email',
-            $user,
-            (new TemplatedEmail())
-                ->from(new Address('compartirmimejoridea@gmail.com', 'Mi Mejor Idea'))
-                ->to((string) $user->getEmail())
-                ->subject('Verifica tu Correo Electrónico')
-                ->htmlTemplate('registration/confirmation_email.html.twig')
-        );
-    }*/
-
-
     #[Route('/verify/email', name: 'app_verify_email')]
     public function verifyUserEmail(Request $request, UserRepository $userRepository, EntityManagerInterface $em): Response
     {
@@ -115,7 +96,7 @@ class RegistrationController extends AbstractController
         }
 
         // On success, flash message and redirection
-        $this->addFlash('success', 'mail_verified');
+        $this->addFlash('success', 'Tu correo electrónico ha sido verificado correctamente.');
 
         return $this->redirectToRoute('app_index');
     }

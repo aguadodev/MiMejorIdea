@@ -1,4 +1,11 @@
-<h1>Verifica tu Correo Electrónico</h1>
+{% extends 'base_email.html.twig' %}
+
+{% block subject %}
+	Verifica tu Correo Electrónico
+{% endblock %}
+
+{% block body %}
+<h3>Verifica tu Correo Electrónico</h3>
 
 <p>
     Por favor, verifica tu dirección de correo electrónico haciendo click en el siguiente enlace: <br><br>
@@ -7,3 +14,4 @@
 </p>
 
 <p>Saludos!</p>
+{% endblock %}

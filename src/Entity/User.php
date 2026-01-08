@@ -7,6 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -37,7 +39,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $isVerified = false;
 
-    #[ORM\Column(length: 50, nullable: true, unique:true)]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-Z0-9](?:[a-zA-Z0-9]|[._](?=[a-zA-Z0-9])){1,18}[a-zA-Z0-9]$/',
+        message: 'El nombre de usuario solo puede contener letras, números, "." y "_", y debe tener entre 3 y 20 caracteres.'
+    )]
+    #[ORM\Column(length: 50, nullable: true, unique: true)]
     private ?string $username = null;
 
     #[ORM\Column]
@@ -148,7 +154,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __serialize(): array
     {
         $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+        $data["\0" . self::class . "\0password"] = hash('crc32c', $this->password);
 
         return $data;
     }
@@ -171,14 +177,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function hasUsername(): bool
+    {
+        return $this->username !== null;
+    }
+
     public function getUsername(): ?string
     {
         return $this->username;
     }
 
-    public function setUsername(?string $username): static
+    public function setUsername(?string $username): self
     {
-        $this->username = $username;
+        // Si ya hay username y se intenta borrar → no permitido
+        if ($this->username !== null && $username === null) {
+            // No hace nada.. o lanza una excepción?
+            // throw new \LogicException('No se puede eliminar un nombre de usuario ya asignado.');
+        } else {
+            $this->username = $username;     
+        }
 
         return $this;
     }

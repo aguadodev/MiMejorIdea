@@ -7,7 +7,6 @@ use App\Form\ChangePasswordFormType;
 use App\Form\EmailFormType;
 use App\Service\Mail;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;

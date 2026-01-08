@@ -28,8 +28,8 @@ class Viaje
 
 
     #[Assert\GreaterThan(
-    value: "now +1 hour",
-    message: "A data ten que ser polo menos unha hora posterior á actual."
+    value: "now +30 minutes",
+    message: "La fecha tiene que ser por lo menos 30 minutos posterior a la actual."
     )]
     #[ORM\Column]
     private ?\DateTime $fechaHora = null;
@@ -42,7 +42,7 @@ class Viaje
     #[Assert\Range(
         min: 1,
         max: 5,
-        notInRangeMessage: "O número de prazas debe estar entre {{ min }} e {{ max }}."
+        notInRangeMessage: "El número de plazas debe estar entre {{ min }} y {{ max }}."
     )]    
     #[ORM\Column(type: Types::SMALLINT)]
     private ?int $plazas = null;

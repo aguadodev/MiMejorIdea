@@ -8,6 +8,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\File;
 
 
@@ -22,7 +23,10 @@ class ProfileType extends AbstractType
             //->add('roles')
             //->add('password')
             //->add('isVerified')
-            ->add('username')
+            ->add('username', TextType::class, [
+                'label' => 'Nombre de usuario',
+                'help' => 'Entre 3 y 20 caracteres. Letras, números, "." e "_"',
+            ])
             //->add('createdAt', null, [
             //    'widget' => 'single_text',
             //])
@@ -52,7 +56,7 @@ class ProfileType extends AbstractType
                         'mimeTypesMessage' => 'Please upload a valid image file',
                     ])
                 ],
-            ])            
+            ])
         ;
     }
 

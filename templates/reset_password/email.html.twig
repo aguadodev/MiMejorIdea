@@ -1,4 +1,11 @@
-<h1>Resetea tu Contraseña</h1>
+{% extends 'base_email.html.twig' %}
+
+{% block subject %}
+	Resetea tu Contraseña
+{% endblock %}
+
+{% block body %}
+<h3>Resetea tu Contraseña</h3>
 
 <p>Para verificar tu contraseña visita el siguiente enlace</p>
 
@@ -7,3 +14,4 @@
 <p>Este enlace expirará en {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</p>
 
 <p>Saludos!</p>
+{% endblock %}

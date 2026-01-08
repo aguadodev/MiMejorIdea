@@ -1,42 +1,46 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>{% block subject %}Mi Mejor Idea{% endblock %}</title>
-</head>
-<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+	<head>
+		<meta charset="UTF-8">
+		<title>
+			{% block subject %}Mi Mejor Idea
+			{% endblock %}
+		</title>
+	</head>
+	<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
 
-    <table width="100%" cellpadding="0" cellspacing="0">
-        <tr>
-            <td align="center">
-                <table width="600" cellpadding="20" cellspacing="0" style="background-color: #ffffff; border-radius: 6px;">
-                    <tr>
-                        <td>
-                            <h2 style="margin-top: 0; color: #333;">
-                                Mi Mejor Idea
-                            </h2>
+		<table width="100%" cellpadding="0" cellspacing="0">
+			<tr>
+				<td align="center">
+					<table width="600" cellpadding="20" cellspacing="0" style="background-color: #ffffff; border-radius: 6px;">
+						<tr>
+							<td>
+								<h2 style="margin-top: 0; color: #333;">
+                                {# @TODO Mejorar la fuente de imagen hardcoded #}
+									<img src="https://mimejoridea.com/assets/img/logoMiMejorIdeaBlanco.png" alt="Mi Mejor Idea" height="50" width="50">
+									Mi Mejor Idea
+								</h2>
 
-                            <hr style="border: none; border-top: 1px solid #ddd;">
+								<hr style="border: none; border-top: 1px solid #ddd;"> {% block body %}{% endblock %}
 
-                            {% block body %}
-                            {% endblock %}
+								<hr style="border: none; border-top: 1px solid #ddd;">
 
-                            <hr style="border: none; border-top: 1px solid #ddd;">
+								<p style="font-size: 12px; color: #777;">
+									Este correo se ha enviado automaticamente.  
+									                                Por favor, no respondas este mensaje.
+								</p>
+							</td>
+						</tr>
+					</table>
 
-                            <p style="font-size: 12px; color: #777;">
-                                Este correo se ha enviado automaticamente.  
-                                Por favor, no respondas este mensaje.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
+					<p style="font-size: 12px; color: #999; margin-top: 10px;">
+						©
+						{{ "now"|date("Y") }}
+						Mi Mejor Idea
+					</p>
+				</td>
+			</tr>
+		</table>
 
-                <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                    © {{ "now"|date("Y") }} Mi Mejor Idea
-                </p>
-            </td>
-        </tr>
-    </table>
-
-</body>
+	</body>
 </html>

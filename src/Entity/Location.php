@@ -43,7 +43,11 @@ class Location
 
     public function __toString(): string
     {
-        return ($this->street . ", " ?? '') . ($this->city ?? '');
+        // @TODO Mejorar toString: Añadir campo etiqueta para mostrar?
+        if (!$this->street && !$this->city)
+            return $this->address;
+        else
+            return ($this->street . ", " ?? '') . ($this->city ?? '');
     }
 
     // -----------------------
