@@ -5,7 +5,8 @@
 {% block body %}
     <h2>Mis Localizaciones</h2>
 
-    <table id="myTable" {#class="table"#}>
+	<div class="table-responsive" >
+    <table id="myTable">
         <thead>
             <tr>
                 <th>Dirección</th>
@@ -41,6 +42,7 @@
         {% endfor %}
         </tbody>
     </table>
+    </div>
 
     <a href="{{ path('app_location') }}" class="btn btn-primary">Crear nueva</a>
 

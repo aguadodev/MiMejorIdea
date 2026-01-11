@@ -12,6 +12,7 @@
 			</tr>
 		</table>
 	{% else %}
+		<div class="table-responsive" >
 		<table id="myTable" class="table">
 			<thead>
 				<tr>
@@ -43,6 +44,7 @@
 				{% endfor %}
 			</tbody>
 		</table>
+		</div>
 
 		{# DATATABLES #}
 		<link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css"/>
@@ -50,7 +52,7 @@
 		<script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
 		<script>
 			let table = new DataTable('#myTable', { // options
-                language: {
+				language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                 },
                 order: [
