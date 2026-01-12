@@ -27,9 +27,11 @@
     L.marker(work).addTo(map).bindPopup("Traballo");
 
     
-    // Debuxa a liña entre puntos
+    // Debuxa a liña entre os puntos
+    //L.polyline([home, work]).addTo(map);
+    // Debuxa a ruta entre os puntos
     showRoute(home, work);
-    L.polyline([home, work]).addTo(map);
+    
 
 
     // Ajustar la vista para mostrar todas las rutas

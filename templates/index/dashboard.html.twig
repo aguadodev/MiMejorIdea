@@ -6,7 +6,7 @@
 
     <h2>Panel de Control</h2>
 
-    <p>Resumen de tu contenido y situación ({{ app.user.email }})</p>
+    <p>Resumen de tu contenido y situación</p>
 
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
 
@@ -47,6 +47,19 @@
                 </div>
             </div>
             </div>
+
+            <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                <div class="card-head-row card-tools-still-right">
+                    <div class="card-title">Mis Intereses</div>
+                </div>
+                </div>
+                <div class="card-body">
+
+                </div>
+            </div>
+            </div>            
         </div>
 
     {% else %}

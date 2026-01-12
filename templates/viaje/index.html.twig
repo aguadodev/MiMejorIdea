@@ -37,7 +37,7 @@
 						<td>
 							<a href="{{ path('app_viaje_show', {'id': viaje.id}) }}" class="btn btn-primary btn-sm">Ver</a>
                             {% if viaje.fechaHora > date() %}
-							<a href="{{ path('app_viaje_edit', {'id': viaje.id}) }}" class="btn btn-secondary btn-sm">Editar</a>
+							<a href="{{ path('app_viaje_edit', {'id': viaje.id}) }}" class="btn btn-primary btn-sm">Editar</a>
                             {% endif %}
 						</td>
 					</tr>
