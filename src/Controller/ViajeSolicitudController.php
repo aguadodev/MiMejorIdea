@@ -65,10 +65,10 @@ final class ViajeSolicitudController extends AbstractController
             }
         }
 
-        /* @TODO Si el viaje está completo...
+        /* Si el viaje está completo...*/
         if ($viaje->estaCompleto()) {
             return $this->denyAndBack($request, 'El viaje ya está completo.');
-        }*/
+        }
 
         $viajeSolicitud = new ViajeSolicitud();
         $viajeSolicitud->setViaje($viaje);

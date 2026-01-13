@@ -1,28 +1,41 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Viaje Solicitud{% endblock %}
+{% block title %}Viaje Solicitud
+{% endblock %}
 
 {% block body %}
-    <h2>Viaje Solicitud</h2>
-    {# @TODO: Revisar contenido
-        - Añadir botones para aceptar o rechazar el estado de la solicitud si aún está pendiente
-    #}
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Pasajero/a</th>
-                <td>{{ viaje_solicitud.pasajero.username }}</td>
-            </tr>
-            <tr>
-                <th>Created At</th>
-                <td>{{ viaje_solicitud.createdAt ? viaje_solicitud.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+	<h2>Viaje Solicitud</h2>
+	{# @TODO: Revisar contenido
+	        - Añadir botones para aceptar o rechazar el estado de la solicitud si aún está pendiente
+	    #}
+	<table class="table">
+		<tbody>
+			<tr>
+				<th>Pasajero/a</th>
+				<td>{{ viaje_solicitud.pasajero.username }}</td>
+			</tr>
+			<tr>
+				<th>Fecha/Hora de Solicitud</th>
+				<td>{{ viaje_solicitud.createdAt ? viaje_solicitud.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+			</tr>
+			<tr>
+				<th>Estado</th>
+				<td>{{ viaje_solicitud.estado.value }}</td>
+			</tr>
+            {% if viaje_solicitud.isPendiente %}
+			<tr>
+				<td colspan="2">
+					<a href="{{ path('viaje_solicitud_aceptar', { id: viaje_solicitud.id, token: viaje_solicitud.token}) }}" class="btn btn-success">Aceptar</a>
+					<a href="{{ path('viaje_solicitud_rechazar', { id: viaje_solicitud.id, token: viaje_solicitud.token}) }}" class="btn btn-danger">Rechazar</a>
+				</td>
+			</tr>
+            {% endif %}
+		</tbody>
+	</table>
 
-    <a href="javascript:history.back()">Volver</a>
+	<a href="javascript:history.back()" class="btn btn-secondary">Volver</a>
 
-    {#<a href="{{ path('app_viaje_solicitud_edit', {'id': viaje_solicitud.id}) }}">edit</a>
-
-    {{ include('viaje_solicitud/_delete_form.html.twig') }}#}
+	{#<a href="{{ path('app_viaje_solicitud_edit', {'id': viaje_solicitud.id}) }}">edit</a>
+	
+	    {{ include('viaje_solicitud/_delete_form.html.twig') }}#}
 {% endblock %}

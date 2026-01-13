@@ -40,7 +40,11 @@
                 #}
                 <td>
                     <a href="{{ path('app_viaje_show', {'id': viaje.id}) }}" class="btn btn-primary btn-sm">Ver</a>
-                    <a href="{{ path('viaje_solicitud_new', {'id': viaje.id}) }}" class="btn btn-success btn-sm">Solicitar</a>
+                    {% if viaje.estaCompleto %}
+                        <span class="badge badge-danger">Completo</span>
+                    {% elseif viaje.puedeSolicitar(app.user) %}
+                        <a href="{{ path('viaje_solicitud_new', {'id': viaje.id}) }}" class="btn btn-success btn-sm">Solicitar</a>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}

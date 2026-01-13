@@ -28,8 +28,8 @@ class Viaje
 
 
     #[Assert\GreaterThan(
-    value: "now +30 minutes",
-    message: "La fecha tiene que ser por lo menos 30 minutos posterior a la actual."
+        value: "now +30 minutes",
+        message: "La fecha tiene que ser por lo menos 30 minutos posterior a la actual."
     )]
     #[ORM\Column]
     private ?\DateTime $fechaHora = null;
@@ -43,7 +43,7 @@ class Viaje
         min: 1,
         max: 5,
         notInRangeMessage: "El número de plazas debe estar entre {{ min }} y {{ max }}."
-    )]    
+    )]
     #[ORM\Column(type: Types::SMALLINT)]
     private ?int $plazas = null;
 
@@ -157,6 +157,53 @@ class Viaje
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function estaCompleto(): ?bool
+    {
+        $solicitudesAceptadas = 0;
+        foreach ($this->getSolicitudes() as $solicitud) {
+            if ($solicitud->isAceptada())
+                $solicitudesAceptadas++;
+        }
+        return ($solicitudesAceptadas >= $this->plazas) ? true : false;
+    }
+
+    /**
+     * Comprueba si el viaje puede ser solicitado por un usuario
+     */
+    public function puedeSolicitar(?User $user): bool
+    {
+        if ($user === null) {
+            return false;
+        }
+
+        if ($this->estaCompleto()) {
+            return false;
+        }
+
+        if ($user === $this->conductor) {
+            return false;
+        }
+
+        foreach ($this->getSolicitudesAceptadas() as $solicitud) {
+            if ($solicitud->getPasajero() === $user) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    /**
+     * @return Collection<int, ViajeSolicitud>
+     */
+    public function getSolicitudesAceptadas(): Collection
+    {
+        return $this->solicitudes->filter(
+            fn(ViajeSolicitud $s) => $s->isAceptada()
+        );
     }
 
     /**

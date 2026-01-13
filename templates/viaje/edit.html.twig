@@ -10,7 +10,7 @@
     {{ include('viaje/_delete_form.html.twig') }}
 
     <div>
-	    <a href="{{ path('app_viaje_show', {'id': viaje.id}) }}">Volver</a>
+	    <a href="{{ path('app_viaje_show', {'id': viaje.id}) }}" class="btn btn-secondary">Volver</a>
     </div>
     {{ include('snnipets/_alert_cambios_sin_guardar.html.twig') }}
 
