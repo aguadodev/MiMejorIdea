@@ -25,13 +25,21 @@
             </tr>
              <tr>
                 <th>Home Location</th>
-                <td><a href="{{ path('app_location_show', {'id': perfil_personal.homeLocation.id}) }}">
-                {{ perfil_personal.homeLocation }}</a></td>
+                <td>
+                {% if perfil_personal.homeLocation %}
+                    <a href="{{ path('app_location_show', {'id': perfil_personal.homeLocation.id}) }}">
+                    {{ perfil_personal.homeLocation }}</a>
+                {% endif %}
+                </td>
             </tr>
              <tr>
                 <th>Work Location</th>
-                <td><a href="{{ path('app_location_show', {'id': perfil_personal.workLocation.id}) }}">
-                {{ perfil_personal.workLocation }}</a></td>
+                <td>
+                {% if perfil_personal.workLocation %}
+                    <a href="{{ path('app_location_show', {'id': perfil_personal.workLocation.id}) }}">
+                    {{ perfil_personal.workLocation }}</a>
+                {% endif %}
+                </td>
             </tr>
             {% if perfil_personal.homeLocation and perfil_personal.workLocation %}
              <tr>

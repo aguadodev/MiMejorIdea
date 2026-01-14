@@ -45,6 +45,7 @@
     </div>
 
     <a href="{{ path('app_location') }}" class="btn btn-primary">Crear nueva</a>
+	<div><a href="{{ path('app_dashboard') }}" class="btn btn-secondary">Volver al Panel de Control</a></div>
 
 
     {# DATATABLES #}
@@ -55,7 +56,7 @@
         let table = new DataTable('#myTable', {
             // options
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                url: '/datatables/i18n/es-ES.json'
                 },
             order: [
                 [0, 'asc']
