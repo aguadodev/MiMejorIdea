@@ -55,7 +55,7 @@ class Mail {
     public function enviarMailSolicitudViaje(ViajeSolicitud $viajeSolicitud) {
         $email = (new TemplatedEmail())
             ->from(new Address('compartirmimejoridea@gmail.com', 'Mi Mejor Idea'))
-            ->to((string) $viajeSolicitud->getViaje()->getConductor()->getEmail())
+            ->to((string) $viajeSolicitud->getPasajero()->getEmail())
             ->subject('💡 Solicitud de Viaje')
             ->htmlTemplate('viaje_solicitud/email_solicitud.html.twig')
             ->context([
@@ -69,7 +69,7 @@ class Mail {
     public function enviarMailSolicitudViajeAceptada(ViajeSolicitud $viajeSolicitud) {
         $email = (new TemplatedEmail())
             ->from(new Address('compartirmimejoridea@gmail.com', 'Mi Mejor Idea'))
-            ->to((string) $viajeSolicitud->getViaje()->getConductor()->getEmail())
+            ->to((string) $viajeSolicitud->getPasajero()->getEmail())
             ->subject('💡 Solicitud de Viaje Aceptada!')
             ->htmlTemplate('viaje_solicitud/email_solicitud_aceptada.html.twig')
             ->context([

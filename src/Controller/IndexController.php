@@ -44,6 +44,12 @@ final class IndexController extends AbstractController
         return $this->render('index/terms.html.twig');
     }
 
+    #[Route('/how', name: 'app_how')]
+    public function how(): Response
+    {
+        return $this->render('index/how.html.twig');
+    }
+
 
 
     /*#[Route('/mail', name: 'app_mail')]

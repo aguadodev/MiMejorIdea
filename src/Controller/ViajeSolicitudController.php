@@ -97,10 +97,14 @@ final class ViajeSolicitudController extends AbstractController
     #[Route('/solicitud/{id}/aceptar/{token}', name: 'viaje_solicitud_aceptar')]
     public function aceptar(ViajeSolicitud $solicitud, string $token, EntityManagerInterface $em, Mail $mail): Response
     {
+        // @TODO Realmente hace falta si va a ser el conductor el que acepte la solicitud?
         if ($solicitud->getToken() !== $token) {
             throw $this->createAccessDeniedException();
         }
 
+        // @TODO Hacer que solo el conductor pueda aceptar la solicitud
+
+        // Si la solicitud ya ha sido procesada...
         if ($solicitud->getEstado() !== ViajeSolicitudEstado::PENDIENTE) {
             $this->addFlash('info', 'Esta solicitud ya ha sido procesada.');
             return $this->redirectToRoute('app_viaje_solicitud_show', ['id' => $solicitud->getId()]);
@@ -121,10 +125,14 @@ final class ViajeSolicitudController extends AbstractController
     #[Route('/solicitud/{id}/rechazar/{token}', name: 'viaje_solicitud_rechazar')]
     public function rechazar(ViajeSolicitud $solicitud, string $token, EntityManagerInterface $em): Response
     {
+        // @TODO Realmente hace falta si va a ser el conductor el que acepte la solicitud?
         if ($solicitud->getToken() !== $token) {
             throw $this->createAccessDeniedException();
         }
 
+        // @TODO Hacer que solo el conductor pueda aceptar la solicitud
+
+        // Si la solicitud ya ha sido procesada...
         if ($solicitud->getEstado() !== ViajeSolicitudEstado::PENDIENTE) {
             $this->addFlash('info', 'Esta solicitud ya ha sido procesada.');
             return $this->redirectToRoute('app_viaje_solicitud_show', ['id' => $solicitud->getId()]);
