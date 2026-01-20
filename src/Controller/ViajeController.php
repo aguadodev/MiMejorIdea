@@ -38,6 +38,14 @@ final class ViajeController extends AbstractController
     }
 
 
+    #[Route('/rutas_proximas', name: 'app_rutas_proximas', methods: ['GET'])]
+    public function rutasProximos(ViajeRepository $viajeRepository): Response
+    {
+        return $this->render('viaje/proximas_rutas.html.twig', [
+            'viajes' => $viajeRepository->findProximosViajes(),
+        ]);
+    }     
+
     #[IsGranted('ROLE_USER')]
     #[Route('/new', name: 'app_viaje_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
@@ -76,7 +84,7 @@ final class ViajeController extends AbstractController
         ]);
     }
 
-
+    #[IsGranted('ROLE_USER')]
     #[Route('/{id}', name: 'app_viaje_show', methods: ['GET'])]
     public function show(Viaje $viaje): Response
     {
@@ -127,4 +135,6 @@ final class ViajeController extends AbstractController
 
         return $this->redirectToRoute('viajes_proximos', [], Response::HTTP_SEE_OTHER);
     }
+   
+
 }

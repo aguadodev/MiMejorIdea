@@ -1,0 +1,151 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Próximas Rutas{% endblock %}
+
+{% block body %}
+<h2>Próximas Rutas</h2>
+<p class="subtitle">Visualización de las rutas de los próximos viajes compartidos</p>
+
+<div class="main-container">
+    <div id="map" style="height: 500px;"></div>
+
+    <aside class="sidebar-rutas">
+        <h3>Conductores</h3>
+
+        <div id="driverList">
+            {% if viajes is empty %}
+                <p>No hay viajes próximos.</p>
+            {% else %}
+                <p>{{ viajes|length }} viajes programados</p>
+            {% endif %}
+        </div>
+
+        <button id="showAllBtn">Mostrar todas</button>
+        <button id="resetViewBtn">Vista inicial</button>
+    </aside>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const viajes = {{ viajes|map(v => {
+    id: v.id,
+    conductor: v.conductor.username,
+    start: {
+        lat: v.startLocation.latitude,
+        lon: v.startLocation.longitude
+    },
+    end: {
+        lat: v.endLocation.latitude,
+        lon: v.endLocation.longitude
+    },
+    fecha: v.fechaHora|date('Y-m-d H:i')
+})|json_encode|raw }};
+</script>
+
+<script>
+let map;
+let routes = {};
+const colors = ["#3498db", "#e67e22", "#9b59b6", "#1abc9c", "#e74c3c"];
+
+function initMap() {
+    map = L.map('map').setView([42.3896, -8.7100], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    showAllRoutes();
+
+    document.getElementById('showAllBtn').addEventListener('click', showAllRoutes);
+    document.getElementById('resetViewBtn').addEventListener('click', resetView);
+}
+
+async function drawRoute(start, end, color) {
+    const url = `https://router.project-osrm.org/route/v1/driving/${start.lon},${start.lat};${end.lon},${end.lat}?geometries=geojson`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    return L.geoJSON(data.routes[0].geometry, {
+        style: { color, weight: 4, opacity: 0.7 }
+    });
+}
+
+async function showAllRoutes() {
+    // Limpar capas previas
+    Object.values(routes).forEach(r => map.removeLayer(r));
+    routes = {};
+
+    const list = document.getElementById('driverList');
+    list.innerHTML = '';
+
+    // Bounds globais
+    const bounds = L.latLngBounds([]);
+
+    for (let i = 0; i < viajes.length; i++) {
+        const v = viajes[i];
+        const color = colors[i % colors.length];
+
+        const route = await drawRoute(v.start, v.end, color);
+        route.addTo(map);
+        routes[v.id] = route;
+
+        // Marcadores
+        const startLatLng = L.latLng(v.start.lat, v.start.lon);
+        const endLatLng   = L.latLng(v.end.lat, v.end.lon);
+
+        L.marker(startLatLng)
+            .addTo(map)
+            .bindPopup(`Origen<br>${v.conductor}`);
+
+        L.marker(endLatLng)
+            .addTo(map)
+            .bindPopup(`Destino`);
+
+        // Engadir puntos aos límites
+        bounds.extend(startLatLng);
+        bounds.extend(endLatLng);
+
+        // Lista lateral
+        const item = document.createElement('div');
+        item.className = 'driver-item';
+        item.textContent = `${v.conductor} · ${v.fecha}`;
+        item.onclick = () => highlightRoute(v.id);
+
+        list.appendChild(item);
+    }
+
+    // Axustar vista só unha vez
+    if (bounds.isValid()) {
+        const isMobile = window.innerWidth < 768;
+
+        map.fitBounds(bounds, {
+            padding: isMobile ? [30, 30] : [80, 80],
+            maxZoom: 14,
+            animate: true
+        });
+    }
+}
+
+
+function highlightRoute(id) {
+    Object.values(routes).forEach(r =>
+        r.setStyle({ weight: 4, opacity: 0.4 })
+    );
+
+    routes[id].setStyle({ weight: 6, opacity: 1 });
+    routes[id].bringToFront();
+}
+
+function resetView() {
+    map.setView([42.3896, -8.7100], 12);
+}
+
+window.onload = initMap;
+</script>
+{% endblock %}

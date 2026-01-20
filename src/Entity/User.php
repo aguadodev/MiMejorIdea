@@ -194,11 +194,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // No hace nada.. o lanza una excepción?
             // throw new \LogicException('No se puede eliminar un nombre de usuario ya asignado.');
         } else {
-            $this->username = $username;     
+            $this->username = $username;
         }
 
         return $this;
     }
+
+    public function anonymize(): void
+    {
+        $this->username = 'usuario_eliminado_' . $this->id;
+        $this->photoFilename = null;
+        //$this->estado = UserStatus::DELETED;
+        $this->email = null;
+        // @TODO Almacenar el email borrado para que no se pueda volver a usar en una cuenta nueva.
+
+    }
+
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
