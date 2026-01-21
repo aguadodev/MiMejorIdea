@@ -34,10 +34,12 @@
 						<td>{{ viaje.endLocation }}</td>
 						<td>{{ viaje.plazas }}</td>
 						<td>
-							{% if viaje.estado.value == 'Publicado' %}
+							{% if viaje.estaPublicado %}
 								<span class="badge bg-success">{{ viaje.estado.value }}</span>
-							{% elseif viaje.estado.value == 'Cancelado' %}
+							{% elseif viaje.estaCancelado %}
 								<span class="badge bg-danger">{{ viaje.estado.value }}</span>
+							{% elseif viaje.estaFinalizado %}
+								<span class="badge bg-info">{{ viaje.estado.value }}</span>						
 							{% endif %}						
 						</td>
 						{#<td>{{ viaje.createdAt ? viaje.createdAt|date('Y-m-d H:i:s') : '' }}</td>

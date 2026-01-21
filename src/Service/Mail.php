@@ -84,6 +84,7 @@ class Mail {
         $email = (new TemplatedEmail())
             ->from(new Address('compartirmimejoridea@gmail.com', 'Mi Mejor Idea'))
             ->to((string) $viajeSolicitud->getPasajero()->getEmail())
+            ->bcc(new Address('compartirmimejoridea@gmail.com', 'Mi Mejor Idea'))
             ->subject('💡 Viaje Cancelado!!')
             ->htmlTemplate('viaje_solicitud/email_viaje_cancelado.html.twig')
             ->context([
