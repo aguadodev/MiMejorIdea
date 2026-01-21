@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\ViajeEstado;
 use App\Repository\ViajeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -59,6 +60,59 @@ class Viaje
     #[ORM\OneToMany(targetEntity: ViajeSolicitud::class, mappedBy: 'viaje', orphanRemoval: true)]
     private Collection $solicitudes;
 
+
+    #[ORM\Column(enumType: ViajeEstado::class)]
+    private ViajeEstado $estado = ViajeEstado::CREADO;
+
+    public function getEstado(): ViajeEstado
+    {
+        return $this->estado;
+    }
+
+    public function publicar(): void
+    {
+        if ($this->estado !== ViajeEstado::CREADO) {
+            throw new \LogicException('O viaxe non pode publicarse.');
+        }
+
+        $this->estado = ViajeEstado::PUBLICADO;
+    }
+
+    public function cancelar(): void
+    {
+        if (!$this->estado->esCancelable()) {
+            throw new \LogicException('O viaxe non pode cancelarse.');
+        }
+
+        $this->estado = ViajeEstado::CANCELADO;
+    }
+
+    public function finalizar(): void
+    {
+        if ($this->estado !== ViajeEstado::PUBLICADO) {
+            throw new \LogicException('O viaxe non pode finalizarse.');
+        }
+
+        $this->estado = ViajeEstado::FINALIZADO;
+    }
+
+   public function estaPublicado(): bool
+    {
+        return $this->estado == ViajeEstado::PUBLICADO;
+    }
+
+    public function estaCancelado(): bool
+    {
+        return $this->estado == ViajeEstado::CANCELADO;
+    }
+
+    public function estaFinalizado(): bool
+    {
+        return $this->estado == ViajeEstado::FINALIZADO;
+    }
+
+
+
     public function __construct()
     {
         // Inicializa la fecha creación al momento actual
@@ -67,8 +121,6 @@ class Viaje
         $this->fechaHora = new \DateTime('+1 hour');
         $this->solicitudes = new ArrayCollection();
     }
-
-
 
     public function getId(): ?int
     {
@@ -206,12 +258,37 @@ class Viaje
         );
     }
 
+    public function tieneSolicitudesAceptadas(): bool
+    {
+        return !$this->getSolicitudesAceptadas()->isEmpty();
+    }
+
+    /**
+     * @return Collection<int, ViajeSolicitud>
+     */
+    public function getSolicitudesPendientes(): Collection
+    {
+        return $this->solicitudes->filter(
+            fn(ViajeSolicitud $s) => $s->isPendiente()
+        );
+    }
+
+    public function tieneSolicitudesPendientes(): bool
+    {
+        return !$this->getSolicitudesPendientes()->isEmpty();
+    }
+
     /**
      * @return Collection<int, ViajeSolicitud>
      */
     public function getSolicitudes(): Collection
     {
         return $this->solicitudes;
+    }
+
+    public function tieneSolicitudes(): bool
+    {
+        return !$this->getSolicitudes()->isEmpty();
     }
 
     public function addSolicitude(ViajeSolicitud $solicitude): static

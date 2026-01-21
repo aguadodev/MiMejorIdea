@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Viaje;
+use App\Enum\ViajeSolicitudEstado;
 use App\Form\ViajeType;
 use App\Repository\ViajeRepository;
+use App\Service\Mail;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +21,7 @@ final class ViajeController extends AbstractController
 {
     use Helper; // trait con código reutilizable para controladores
 
-    
+
     #[Route(name: 'viajes_proximos', methods: ['GET'])]
     public function viajesProximos(ViajeRepository $viajeRepository): Response
     {
@@ -44,7 +47,7 @@ final class ViajeController extends AbstractController
         return $this->render('viaje/proximas_rutas.html.twig', [
             'viajes' => $viajeRepository->findProximosViajes(),
         ]);
-    }     
+    }
 
     #[IsGranted('ROLE_USER')]
     #[Route('/new', name: 'app_viaje_new', methods: ['GET', 'POST'])]
@@ -70,7 +73,8 @@ final class ViajeController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $viaje->setConductor($user);
-            
+            $viaje->publicar();
+
             $entityManager->persist($viaje);
             $entityManager->flush();
 
@@ -110,6 +114,7 @@ final class ViajeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $viaje->setUpdatedAt(new \DateTime()); // Fecha última modificación
             $entityManager->flush();
 
             return $this->redirectToRoute('viajes_proximos', [], Response::HTTP_SEE_OTHER);
@@ -123,18 +128,53 @@ final class ViajeController extends AbstractController
 
     #[IsGranted('ROLE_USER')]
     #[Route('/{id}', name: 'app_viaje_delete', methods: ['POST'])]
-    public function delete(Request $request, Viaje $viaje, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Viaje $viaje, EntityManagerInterface $entityManager, Mail $mail): Response
     {
+        // Solo el conductor puede borrar/cancelar un viaje
         if (!($viaje->getConductor() === $this->getUser()))
             throw new AccessDeniedHttpException('No tienes permiso.');
 
+        // @TODO Si el viaje ya ha finalizado no se puede cancelar.
+
         if ($this->isCsrfTokenValid('delete' . $viaje->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($viaje);
-            $entityManager->flush();
+            if ($viaje->tieneSolicitudes()) {
+                // @TODO Si el viaje tiene solicitudes pendientes
+                // Se rechazan por cancelación de viaje y se notifica a los posibles pasajeros
+                if ($viaje->tieneSolicitudesPendientes()) {
+                    foreach ($viaje->getSolicitudesPendientes() as $solicitud) {
+                        // Cancelar solicitud
+                        $solicitud->setEstado(ViajeSolicitudEstado::RECHAZADA_POR_CANCELACION_VIAJE);
+                        // Enviar notificación por mail al pasajero
+                        $mail->enviarMailViajeCancelado($solicitud);
+                        $this->addFlash('success', 'Viaje cancelado correctamente.');
+                    }
+                }
+
+                // @TODO Si el viaje tiene solicitudes aceptadas
+                // Se cancelan por cancelación de viaje y se notifica a los pasajeros
+                if ($viaje->tieneSolicitudesAceptadas()) {
+                    foreach ($viaje->getSolicitudesAceptadas() as $solicitud) {
+                        // Cancelar solicitud
+                        $solicitud->setEstado(ViajeSolicitudEstado::CANCELADA_POR_CONDUCTOR);
+                        // Enviar notificación por mail al pasajero
+                        $mail->enviarMailViajeCancelado($solicitud);
+                        $this->addFlash('success', 'Viaje cancelado correctamente.');
+                    }
+                }
+
+                // Cancelar Viaje
+                $viaje->setUpdatedAt(new \DateTime()); // Fecha última modificación
+                // Cambiar estado
+                $viaje->cancelar();
+                $entityManager->flush();
+            } else {
+                // Si el viaje no tiene solicitudes ni interacciones
+                // Se borra directamente
+                $entityManager->remove($viaje);
+                $entityManager->flush();
+            }
         }
 
-        return $this->redirectToRoute('viajes_proximos', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('viajes_usuario', [], Response::HTTP_SEE_OTHER);
     }
-   
-
 }

@@ -1,4 +1,19 @@
-<form method="post" action="{{ path('app_viaje_delete', {'id': viaje.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
+<form method="post" action="{{ path('app_viaje_delete', {'id': viaje.id}) }}" 
+      onsubmit="return confirmarCancelacion();">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ viaje.id) }}">
-    <button class="btn btn-danger">Borrar</button>
+    <button class="btn btn-danger">Cancelar</button>
 </form>
+
+<script>
+function confirmarCancelacion() {
+    {% if viaje.tieneSolicitudesAceptadas and viaje.tieneSolicitudesPendientes %}
+        return confirm('Este viaje tiene pasajeros confirmados y solicitudes pendientes. Al cancelarlo se notificará a todos.');
+    {% elseif viaje.tieneSolicitudesAceptadas %}
+        return confirm('Este viaje tiene pasajeros confirmados. Al cancelarlo se notificará a todos.');        
+    {% elseif viaje.tieneSolicitudesPendientes %}
+        return confirm('Este viaje tiene solicitudes pendientes. Al cancelarlo se notificará a todos.');   
+    {% else %}
+        return confirm('¿Seguro que quieres cancelar este viaje?')
+    {% endif %}     
+}
+</script>

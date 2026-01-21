@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Viaje;
+use App\Enum\ViajeEstado;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -24,7 +25,9 @@ class ViajeRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('v')
             ->andWhere('v.fechaHora > :now')
+            ->andWhere('v.estado != :cancelado')
             ->setParameter('now', new \DateTimeImmutable())
+            ->setParameter('cancelado', ViajeEstado::CANCELADO)            
             ->orderBy('v.fechaHora', 'ASC')
             //->setMaxResults(10)
             ->getQuery()
