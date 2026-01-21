@@ -22,7 +22,7 @@
 				<th>Estado</th>
 				<td>{{ viaje_solicitud.estado.value }}</td>
 			</tr>
-            {% if viaje_solicitud.isPendiente %}
+            {% if viaje_solicitud.isPendiente and app.user == viaje_solicitud.viaje.conductor %}
 			<tr>
 				<td colspan="2">
 					<a href="{{ path('viaje_solicitud_aceptar', { id: viaje_solicitud.id, token: viaje_solicitud.token}) }}" class="btn btn-success">Aceptar</a>
