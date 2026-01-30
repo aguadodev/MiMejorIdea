@@ -28,7 +28,7 @@ class ViajeType extends AbstractType
         $builder
             ->add('fechaHora', DateTimeType::class, [
             'widget' => 'single_text',
-            'data' => $minDate, // valor por defecto opcional
+            //'data' => $minDate, // valor por defecto opcional
             'attr' => [
                 'min' => $minDate->format('Y-m-d\TH:i'),
                 'max' => $maxDate->format('Y-m-d\TH:i'),

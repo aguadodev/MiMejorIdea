@@ -46,7 +46,7 @@
 						<td>{{ viaje.updatedAt ? viaje.updatedAt|date('Y-m-d H:i:s') : '' }}</td>#}
 						<td>
 							<a href="{{ path('app_viaje_show', {'id': viaje.id}) }}" class="btn btn-primary btn-sm">Ver</a>
-                            {% if viaje.fechaHora > date() %}
+                            {% if viaje.fechaHora > date() and viaje.estaPublicado %}
 							<a href="{{ path('app_viaje_edit', {'id': viaje.id}) }}" class="btn btn-primary btn-sm">Editar</a>
                             {% endif %}
 						</td>

@@ -110,6 +110,10 @@ final class ViajeController extends AbstractController
             throw new AccessDeniedHttpException('No tienes permiso.');
         }
 
+        if (!$viaje->estaPublicado()) {
+            throw new AccessDeniedHttpException('El viaje no está publicado.');
+        }
+        
         $form = $this->createForm(ViajeType::class, $viaje);
         $form->handleRequest($request);
 
