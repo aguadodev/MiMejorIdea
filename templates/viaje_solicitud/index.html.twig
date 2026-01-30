@@ -17,7 +17,7 @@
         {% for viaje_solicitud in viaje_solicituds %}
             <tr>
                 <td>{{ viaje_solicitud.id }}</td>
-                <td>{{ viaje_solicitud.createdAt ? viaje_solicitud.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ viaje_solicitud.createdAt ? viaje_solicitud.createdAt|date('d-m-Y H:i') : '' }}</td>
                 <td>
                     <a href="{{ path('app_viaje_solicitud_show', {'id': viaje_solicitud.id}) }}">show</a>
                     <a href="{{ path('app_viaje_solicitud_edit', {'id': viaje_solicitud.id}) }}">edit</a>

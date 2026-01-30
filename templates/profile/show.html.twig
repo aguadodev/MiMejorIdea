@@ -40,15 +40,15 @@
 			</tr>
 			<tr>
 				<th>CreatedAt</th>
-				<td>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+				<td>{{ user.createdAt ? user.createdAt|date('d-m-Y H:i') : '' }}</td>
 			</tr>
 			<tr>
 				<th>UpdatedAt</th>
-				<td>{{ user.updatedAt ? user.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+				<td>{{ user.updatedAt ? user.updatedAt|date('d-m-Y H:i') : '' }}</td>
 			</tr>
 			<tr>
 				<th>LastLogin</th>
-				<td>{{ user.lastLogin ? user.lastLogin|date('Y-m-d H:i:s') : '' }}</td>
+				<td>{{ user.lastLogin ? user.lastLogin|date('d-m-Y H:i') : '' }}</td>
 			</tr>
 			<tr>
 				<th>Enabled</th>

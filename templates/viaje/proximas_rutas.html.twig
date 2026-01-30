@@ -44,7 +44,7 @@ const viajes = {{ viajes|map(v => {
         lat: v.endLocation.latitude,
         lon: v.endLocation.longitude
     },
-    fecha: v.fechaHora|date('Y-m-d H:i')
+    fecha: v.fechaHora|date('d-m-Y H:i')
 })|json_encode|raw }};
 </script>
 

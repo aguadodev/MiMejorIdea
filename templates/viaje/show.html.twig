@@ -18,7 +18,7 @@
 			</tr>
 			<tr>
 				<th>Fecha/Hora de Salida</th>
-				<td>{{ viaje.fechaHora ? viaje.fechaHora|date('Y-m-d H:i:s') : '' }}</td>
+				<td>{{ viaje.fechaHora ? viaje.fechaHora|date('d-m-Y H:i') : '' }}</td>
 			</tr>
 			<tr>
 				<th>Localización de Origen</th>
@@ -90,7 +90,7 @@
 					<tr></tr>
 					<tr>
 						<th>CreatedAt</th>
-						<td>{{ viaje.createdAt ? viaje.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+						<td>{{ viaje.createdAt ? viaje.createdAt|date('d-m-Y H:i') : '' }}</td>
 					</tr>
 				</tbody>
 			</td>

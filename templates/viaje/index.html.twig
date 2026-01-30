@@ -29,7 +29,7 @@
 			<tbody>
 				{% for viaje in viajes %}
 					<tr>
-						<td>{{ viaje.fechaHora ? viaje.fechaHora|date('Y-m-d H:i:s') : '' }}</td>
+						<td>{{ viaje.fechaHora ? viaje.fechaHora|date('d-m-Y H:i') : '' }}</td>
 						<td>{{ viaje.startLocation }}</td>
 						<td>{{ viaje.endLocation }}</td>
 						<td>{{ viaje.plazas }}</td>
@@ -42,8 +42,8 @@
 								<span class="badge bg-info">{{ viaje.estado.value }}</span>						
 							{% endif %}						
 						</td>
-						{#<td>{{ viaje.createdAt ? viaje.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-						<td>{{ viaje.updatedAt ? viaje.updatedAt|date('Y-m-d H:i:s') : '' }}</td>#}
+						{#<td>{{ viaje.createdAt ? viaje.createdAt|date('d-m-Y H:i') : '' }}</td>
+						<td>{{ viaje.updatedAt ? viaje.updatedAt|date('d-m-Y H:i') : '' }}</td>#}
 						<td>
 							<a href="{{ path('app_viaje_show', {'id': viaje.id}) }}" class="btn btn-primary btn-sm">Ver</a>
                             {% if viaje.fechaHora > date() and viaje.estaPublicado %}
