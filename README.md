@@ -3,11 +3,12 @@ Mi Mejor Idea es un proyecto de desarrollo didáctico, colaborativo y sin ánimo
 Puedes descargar e instalar tu propia versión de la aplicación:
 
 Requisitos recomendados para desarrollo local en Windows: 
-1. XAMPP (Apache, PHP, MySQL, phpMyAdmin)
-2. Composer
-3. Symfony CLI
-4. Git
-5. Cuenta de correo (por ejemplo GMail)
+1. **XAMPP** (Apache, PHP, MySQL, phpMyAdmin)
+2. **php.ini** con las extensiones adecuadas (php-zip)
+3. [**Composer**]([url](https://getcomposer.org/download/))
+4. [**Symfony CLI**]([url](https://symfony.com/download))
+5. Git
+6. Cuenta de correo (por ejemplo GMail)
 
 Pasos para instalación/despliegue:
 1. Descarga/clona el repositorio
