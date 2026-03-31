@@ -1,0 +1,18 @@
+@startuml MiMejorIdea
+
+class User
+class PerfilPersonal
+class Viaje
+class Location
+class ViajeSolicitud
+
+User "0..1" -- "*" Location
+User "1" -- "1" PerfilPersonal
+Viaje "*" -- "1" User : conductor/a
+Viaje "*" -- "*" User : pasajeros
+Viaje "*" -- "1" Location : start
+Viaje "*" -- "1" Location : end
+User "1" -- "*" ViajeSolicitud
+Viaje "1" -- "*" ViajeSolicitud 
+
+@enduml

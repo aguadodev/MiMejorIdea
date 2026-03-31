@@ -88,9 +88,14 @@ final class LocationController extends AbstractController
             throw new AccessDeniedHttpException('No tienes permiso.');
 
         if ($this->isCsrfTokenValid('delete' . $location->getId(), $request->getPayload()->getString('_token'))) {
-            // @TODO - Comprobar si la localización se está usando para evitar errores de integridad referencial
-            $entityManager->remove($location);
-            $entityManager->flush();
+            // Si la localización está en uso no se puede borrar para evitar errores de integridad referencial
+            // @TODO Si el usuario quiere "desentenderse" de esta localización se podría mantener y desvincular del usuario
+            try {
+                $entityManager->remove($location);
+                $entityManager->flush();
+            } catch (\Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException $e) {
+                $this->addFlash('error', 'No se puede eliminar la ubicación porque está en uso');
+                return $this->redirect($request->getUri());            }            
         }
 
         return $this->redirectToRoute('app_location_index', [], Response::HTTP_SEE_OTHER);
