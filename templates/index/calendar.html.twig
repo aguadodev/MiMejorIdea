@@ -23,6 +23,17 @@
 
     <script>
 
+    {# PROBAR PARA REDIMENSIONAR EL CALENDARIO CUANDO SE COMPRIME LA BARRA DE NAVEGACIÓN
+    // Eliminar "var" en la declaración de "var calendar" tras DOMContentLoaded
+    let calendar;
+    document.querySelector('.toggle-sidebar')
+        .addEventListener('click', function () {
+            setTimeout(function () {
+                calendar.updateSize();
+            }, 300); // espera á animación CSS
+        });    
+    #}
+
       document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {

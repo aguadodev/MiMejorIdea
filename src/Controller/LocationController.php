@@ -26,8 +26,13 @@ final class LocationController extends AbstractController
             $entityManager->persist($location);
             $entityManager->flush();
 
-            // Engadir ID como query param
-            return $this->redirect($request->query->get('redirect_to'));
+            // Redirige/vuelve a la URL que corresponda o a ver la Localización creada
+            $url = $request->query->get('redirect_to');
+            if (!is_string($url) || empty($url))
+                return $this->redirectToRoute('app_location_show', ['id' => $location->getId()]);
+            else
+                return $this->redirect($url);
+            
         }
 
         return $this->render('location/new.html.twig', [

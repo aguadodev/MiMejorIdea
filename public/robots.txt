@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /
+
+# Permitir solo páginas públicas
+Allow: /
+Allow: /how
+Allow: /about
+Allow: /terms
+
+Sitemap: https://mimejoridea.com/sitemap.xml
