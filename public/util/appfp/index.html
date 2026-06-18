@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppFP</title>
+    <!-- Estilos externos -->
+    <link rel="stylesheet" href="css/estilosFaltas.css">
+</head>
+
+<body>
+<h1>AppFP</h1>
+<p>Ferramentas de apoio á titoría de Ciclos de FP e á labor docente en xeral.</p>
+<ul>
+    <li>Funciona localmente. Non require acceso a Internet e Non envía os datos analizados a ningún outro equipo.</li>
+    <li>Usar baixo a propia responsabilidade</li>
+    <li>Repositorio público en GitHub: <a href="https://github.com/aguadodev/AppFP">https://github.com/aguadodev/AppFP</a></li>
+</ul>
+<h2>Analizador de Faltas, Apercibimientos y PD</h2>
+<p>Proposta de proceso de xestión de faltas e apercibimentos.</p>
+<p>Realizar unha vez á semana na hora de titoría creando unha carpeta coa data do día en formato "aaaa-mm-dd"</p>
+<p>Cómpre ter actualizada a xustificación de faltas.</p>
+<ol>
+    <li>Obter e gardar o informe de Faltas Detalladas do <a href="https://www.edu.xunta.gal/xade" target="_blank">Xade</a>.</li>
+    <li>Cargar Informe na <a href="FaltasDetalladasYApercibimientos.html" target="_blank">APP Faltas e Apercibimentos</a></li>
+    <li>Cargar, se é o caso, apercibimentos previos.</li>
+    <li>Se hai novos apercibimentos ou comunicacións de PD, xerar e gardar o arquivo de apercibimentos actualizado.</li>
+    <li>Xerar no Xade os informes de apercibimentos e comunicacións PD para o alumnado afectado no punto anterior. Gardar e imprimir</li>
+    <li>Deixar en secretaría para obter sinaturas e rexistro de saída.</li>
+    <li>Notificar ao alumnado presencialmente ou vía Abalar (consultar manual de Amalia)</li>
+    <li><a href="Apercibimientos.html" target="_blank">Actualizar o arquivo de apercibimentos</a> coa data de acuse de recibo.</li>
+</ol>
+
+<p><strong>Entrada de Datos</strong></p>
+<ul>
+    <li><strong>DATOS - Módulos.csv</strong><br>
+        Datos de los módulos, número de horas anuales, etc. en formato CSV como el modelo que se adjunta.
+        Extraído de <a
+            href="https://www.edu.xunta.gal/fp/familias-profesionais">https://www.edu.xunta.gal/fp/familias-profesionais</a>
+    </li>
+    <li><strong>DATOS - Apercibimentos.csv</strong> (Opcional)<br>
+        Datos de Apercibimientos y Comunicaciones de PD en formato CSV como el modelo que se adjunta.<br>
+        Si no se aporta se puede omitir y utilizar la propia aplicación para generar y descargar un primer borrador en
+        el que luego sólo habrá que ajustar las fechas de informe y acuse.
+    </li>
+    <li><strong>FALTAS DETALLADAS</strong><br>
+        Contenido del Informe predefinido en PDF <strong>"AL030-Faltas detalladas"</strong> con
+        todas las faltas desde el inicio del curso (9/9/2026).
+        Se puede hacer un copy-paste "a lo bruto" del contenido del PDF en el cuadro de texto o cargar un fichero de
+        texto donde se haya guardado este contenido previamente.
+        La aplicación parseará y filtrará el contenido para procesar sólo las faltas de asistencia no justificadas.
+    </li>
+</ul>
+
+<h3>Salida de Datos</h3>
+<ol>
+    <li><strong>Módulos y Umbrales</strong><br>
+    </li>
+    <li><strong>Faltas Detalladas</strong><br>
+    </li>
+    <li><strong>Tabla Resumen</strong><br>
+    </li>
+    <li><strong>Apercibimientos (6%)</strong><br>
+    </li>
+    <li><strong>Comunicaciones PD (4%)</strong><br>
+    </li>
+    <li><strong>Informe para imprimir</strong><br>
+    </li>
+</ol>
+
+<h3>Acciones posteriores</h3>
+<ol>
+    <li><strong>Generar y tramitar el "AL933-Apercibimento PD" para el alumnado con nuevos apercibimientos.</strong><br>
+    </li>
+    <li><strong>Tramitar la Comunicación PD para el alumnado con nuevas comunicaciones PD.</strong><br>
+    </li>
+    <li><strong>Actualizar y descargar el fichero CSV de Apercibimientos y Comunicaciones</strong><br>
+    </li>
+</ol>
+
+<h2>Analizador de Cualificacións</h2>
+<p><a href="AnalizadorCualificacions-InformeAL080v3.html">AnalizadorCualificacions-InformeAL080.html</a></p>
+<p>Carga el fichero CSV resultante del Informe predefinido "AL080-Listaxe cualificacións"</p>
+</body>

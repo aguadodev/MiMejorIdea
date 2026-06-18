@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador de Faltas de Asistencia con Apercibimientos y Comunicaciones</title>
+
+    <!-- DataTables CSS y jQuery (locales) -->
+    <link rel="stylesheet" type="text/css" href="datatables/datatables.min.css" />
+    <script type="text/javascript" src="datatables/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="datatables/datatables.min.js"></script>
+
+<!-- Cargar os datos dos ciclos -->
+<script src="datosCiclos.js"></script>    
+    <!-- Estilos externos -->
+    <link rel="stylesheet" href="css/estilosFaltas.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>📊 Analizador de Faltas, Apercibimientos y Comunicaciones PD</h1>        
+
+        <div class="controls-section" id="controlsSection">
+            <h2>Datos de Entrada</h2>
+            <div class="file-input">
+                <label><strong>1. Faltas Detalladas desde o inicio de curso (Informe AL030):</strong> </label><br>
+                </strong> 
+            <textarea id="inputText" rows="2" placeholder="Abre o informe, selecciona todo (Ctrl+A), copia (Ctrl+C) e pega (Ctrl+V)"></textarea>
+
+                <label><strong>2. Arquivo de apercibimentos e comunicacións PD previas (opcional):</strong></label>
+                <input type="file" id="apercibimientosPreviosInput" accept=".csv"
+                onclick="this.value=null" onchange="loadApercibimientosPreviosFile(event)">
+            </div>         
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="success" class="success" style="display: none;"></div>
+        <div id="warning" class="warning" style="display: none;"></div>
+
+        <button onclick="toggleControlsSection()" id="toggleControlsBtn">📁 Ocultar Controles</button>
+        <button class="action-button warning" onclick="guardarApercibimientos()">💾 Guardar apercibimientos/comunicaciones</button>        
+        <button class="print-button" onclick="generarInformeImpresion()" id="printBtn" disabled>🖨️ Generar Informe para Imprimir</button>          
+
+
+        <div class="stats-container">
+            <div class="stats" id="stats" style="display: none;">
+                <strong>Estadísticas:</strong>
+                <span id="totalFaltas">0</span> faltas totales ·
+                <span id="totalAlumnos">0</span> alumnos ·
+                <span id="totalModulos">0</span> módulos
+            </div>
+
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('modulos')">📚 1. Módulos y Umbrales</div>
+            <div class="tab" onclick="showTab('faltasDetalladas')">📋 2. Faltas Detalladas</div>
+            <div class="tab" onclick="showTab('resumen')">📊 3. Tabla Resumen</div>
+            <div class="tab" onclick="showTab('apercibimientos')">⚠️ 4. Apercibimientos (6%)</div>
+            <div class="tab" onclick="showTab('comunicaciones')">📢 5. Comunicaciones PD (4%)</div>
+        </div>
+
+
+
+        <div id="modulosTab" class="tab-content active">
+            <!-- Selector de ciclos -->
+            <div class="selector-ciclo" style="margin-bottom: 20px; padding: 15px; background-color: #e7f3ff; border-radius: 8px;">
+                <label for="cicloSelector" style="font-weight: bold; margin-right: 10px;">Seleccionar Ciclo Formativo:</label>
+                <select id="cicloSelector" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; min-width: 300px;">
+                    <option value="">Cargando ciclos...</option>
+                </select>
+                <span id="cicloInfo" style="margin-left: 15px; color: #666; font-size: 0.9em;"></span>
+            </div>            
+
+
+            <div class="table-container">
+                <table id="modulosTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Módulo</th>
+                            <th>Horas</th>
+                            <th>Sesiones (50')</th>
+                            <th>Umbral 6% (Apercibimiento)</th>
+                            <th>Umbral 4% (Comunicación)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modulosBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="faltasDetalladasTab" class="tab-content">
+            <div class="table-container">
+                <table id="faltasDetalladasTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Apellidos</th>
+                            <th>Nombre</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Módulo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="faltasDetalladasBody">
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <button class="action-button" onclick="downloadCSV()" id="downloadBtn" disabled>📥 Descargar
+                    CSV</button>
+            </div>            
+        </div>
+
+        <div id="resumenTab" class="tab-content">
+            <div class="table-container">
+                <table id="resumenTable" class="display">
+                    <thead>
+                        <tr id="tableHeader">
+                            <th>Alumno</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="leyenda-colores">
+                <div><span class="color-muestra" style="background-color: transparent; border: 1px solid #ccc;"></span>
+                    Sin apercibimiento (&lt;6%)</div>
+                <div><span class="color-muestra" style="background-color: #fd7e14;"></span> 🔶 Apercibimiento pendiente
+                    (≥6% no enviado)</div>
+                <div><span class="color-muestra" style="background-color: #fff3cd;"></span> 🟡 Apercibimiento enviado
+                    (esperando 4%)</div>
+                <div><span class="color-muestra" style="background-color: #dc3545;"></span> 🔴 Comunicación pendiente
+                    (≥4% desde último apercibimiento)</div>
+                <div><span class="color-muestra" style="background-color: #000000;"></span> ⚫ Comunicación ya enviada
+                </div>
+            </div>            
+            <div class="action-bar">
+                <button class="action-button" onclick="downloadResumenCSV()" id="downloadResumenBtn" disabled>📥
+                    Descargar CSV</button>
+            </div>            
+        </div>
+
+        <div id="apercibimientosTab" class="tab-content">
+            <div class="table-container">
+                <table id="apercibimientosTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Apellidos y Nombre</th>
+                            <th>Materia/Módulo</th>
+                            <th>Faltas</th>
+                            <th>% sobre total sesiones</th>
+                            <th>Umbral 6%</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apercibimientosBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="comunicacionesTab" class="tab-content">
+            <div class="table-container">
+                <table id="comunicacionesTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Apellidos y Nombre</th>
+                            <th>Materia/Módulo</th>
+                            <th>Fecha último apercibimiento</th>
+                            <th>Faltas desde entonces</th>
+                            <th>% desde último apercibimiento</th>
+                            <th>Umbral 4%</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comunicacionesBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+        // Configuración de DataTables en español (local)
+        const datatableSpanish = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla",
+            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            }
+        };
+
+        // Variables globales
+        let curso = null;
+        let ciclo = null;
+        let grupo = null;
+
+
+        let faltasData = [];
+        let alumnos = new Set();
+        let alumnosDetalle = {};
+        let modulos = new Set();
+        let matrizResumen = {};
+        let lines = [];
+
+
+        // Variables para os ciclos
+        let ciclosDisponibles = [];
+        let cicloActual = null;
+
+
+        // Datos de módulos desde CSV
+        let modulosData = {};
+        let sesionesPorModulo = {};
+        let umbralesPorModulo = {};
+
+        // Datos de apercibimientos y comunicaciones previas
+        let apercibimientosPrevios = new Set(); // Formato: "alumno|modulo" (en minúsculas para comparación)
+        let comunicacionesPrevias = new Set(); // Formato: "alumno|modulo" para comunicaciones ya enviadas
+        let apercibimientosPreviosDetalle = [];
+        let apercibimientosPorAlumnoModulo = {}; // Mapa para acceso rápido a fecha de acuse de apercibimientos
+
+        // Datos calculados
+        let apercibimientosPendientes = []; // Apercibimientos no enviados (≥6%)
+        let comunicacionesPendientes = []; // Comunicaciones no enviadas (≥4% desde último apercibimiento)
+
+        // Mapeo de nombres de módulos (para coincidencias aproximadas)
+        let moduloMapping = {};
+
+        // Contenido original del archivo de apercibimientos (para concatenar)
+        let contenidoOriginalApercibimientos = 'TIPO INFORME,DATA INFORME,DATA ACUSE,APELIDOS,NOME,MATERIA\n';
+
+        // Configuración
+        const SESION_MINUTOS = 50;
+
+
+        // **************************************************************************************************
+        // *** Definir el tipo de ordenamiento personalizado para fechas en DataTables (formato dd/mm/yyyy)
+        // **************************************************************************************************
+
+        jQuery.fn.dataTableExt.oSort['fecha-ddmmyyyy-asc'] = function(a, b) {
+            // Convertir dd/mm/aaaa a timestamp o a YYYYMMDD para comparar
+            let da = a.split('/');
+            let db = b.split('/');
+            
+            let fechaA = new Date(da[2], da[1] - 1, da[0]);
+            let fechaB = new Date(db[2], db[1] - 1, db[0]);
+            
+            return ((fechaA < fechaB) ? -1 : ((fechaA > fechaB) ? 1 : 0));
+        };
+
+        jQuery.fn.dataTableExt.oSort['fecha-ddmmyyyy-desc'] = function(a, b) {
+            let da = a.split('/');
+            let db = b.split('/');
+            
+            let fechaA = new Date(da[2], da[1] - 1, da[0]);
+            let fechaB = new Date(db[2], db[1] - 1, db[0]);
+            
+            return ((fechaA < fechaB) ? 1 : ((fechaA > fechaB) ? -1 : 0));
+        };  
+
+
+
+
+
+// Modificar o window.onload existente
+window.onload = function() {
+    cargarCiclos(); // Cargar os ciclos en lugar dos módulos por defecto
+};        
+
+
+// Muestra la solapa seleccionada
+function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+            if (tabName === 'modulos') {
+                document.querySelector('.tab').classList.add('active');
+                document.getElementById('modulosTab').classList.add('active');
+            } else if (tabName === 'faltasDetalladas') {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('faltasDetalladasTab').classList.add('active');
+            } else if (tabName === 'resumen') {
+                document.querySelectorAll('.tab')[2].classList.add('active');
+                document.getElementById('resumenTab').classList.add('active');
+            } else if (tabName === 'apercibimientos') {
+                document.querySelectorAll('.tab')[3].classList.add('active');
+                document.getElementById('apercibimientosTab').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[4].classList.add('active');
+                document.getElementById('comunicacionesTab').classList.add('active');
+            }
+        }
+
+
+// ******************************************************************
+// *** CARGAR DATOS DE CICLOS DESDE FICHEIRO EXTERNO (datosCiclos.js)
+// ******************************************************************
+
+// Cargar os datos dos ciclos desde o ficheiro externo
+function cargarCiclos() {
+    // Comprobar se a variable global datosCiclos existe
+    if (typeof datosCiclos !== 'undefined' && Array.isArray(datosCiclos)) {
+        ciclosDisponibles = datosCiclos;
+        inicializarSelectorCiclos();
+    } else {
+        console.error('Non se puideron cargar os datos dos ciclos');
+        showError('Erro ao cargar os datos dos ciclos. Verifica que o ficheiro datosCiclos.js estea presente.');
+    }
+}
+
+// Inicializar o selector de ciclos
+function inicializarSelectorCiclos() {
+    const selector = document.getElementById('cicloSelector');
+    if (!selector) return;
+    
+    selector.innerHTML = '';
+    
+    ciclosDisponibles.forEach((ciclo, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${ciclo.nomeCiclo} (${ciclo.siglasCiclo})`;
+        selector.appendChild(option);
+    });
+    
+    // Seleccionar o primeiro ciclo por defecto
+    if (ciclosDisponibles.length > 0) {
+        selector.value = '0';
+        cargarCicloSeleccionado(0);
+    }
+    
+    // Engadir evento de cambio
+    selector.addEventListener('change', function() {
+        const index = parseInt(this.value);
+        if (!isNaN(index) && ciclosDisponibles[index]) {
+            cargarCicloSeleccionado(index);
+        }
+    });
+}
+
+// Cargar un ciclo específico
+function cargarCicloSeleccionado(index) {
+    cicloActual = ciclosDisponibles[index];
+    
+    // Limpar datos anteriores
+    modulosData = {};
+    sesionesPorModulo = {};
+    umbralesPorModulo = {};
+    moduloMapping = {};
+    
+    // Procesar cada módulo do ciclo
+    cicloActual.modulos.forEach(modulo => {
+        const nome = modulo.nome;
+        const horas = modulo.horas;
+        
+        const sesionesTotales = (horas * 60) / SESION_MINUTOS;
+        const umbral6 = Math.floor(sesionesTotales * 0.06) + 1;
+        const umbral4 = Math.floor(sesionesTotales * 0.04) + 1;
+        
+        modulosData[nome] = {
+            curso: modulo.curso,
+            codigo: modulo.codigo,
+            nome: nome,
+            horas: horas,
+            periodos: modulo.periodosSemanais,
+            sesionesTotales: sesionesTotales.toFixed(1),
+            sesionesNumero: sesionesTotales,
+            umbral6: umbral6,
+            umbral4: umbral4
+        };
+        
+        sesionesPorModulo[nome] = sesionesTotales;
+        umbralesPorModulo[nome] = { umbral6, umbral4 };
+        
+        // Crear mapping para coincidencias
+        const nomeNormalized = normalizeModuloName(nome);
+        moduloMapping[nomeNormalized] = nome;
+        
+        // Mapping sen parénteses
+        const semParentesis = nome.replace(/[\(\)]/g, '').trim();
+        moduloMapping[normalizeModuloName(semParentesis)] = nome;
+        
+        // Mapping por palabras clave
+        const palabras = nomeNormalized.split(' ').filter(p => p.length > 3);
+        palabras.forEach(palabra => {
+            moduloMapping[palabra] = nome;
+        });
+    });
+    
+    // Actualizar información na interface
+    const modulosCargadosSpan = document.getElementById('modulosCargados');
+    if (modulosCargadosSpan) {
+        modulosCargadosSpan.textContent = Object.keys(modulosData).length;
+    }
+    
+    const modulosInfoDiv = document.getElementById('modulosInfo');
+    if (modulosInfoDiv) {
+        modulosInfoDiv.style.display = 'block';
+        modulosInfoDiv.innerHTML = `📚 Módulos cargados: ${Object.keys(modulosData).length} - Ciclo: <strong>${cicloActual.nomeCiclo}</strong>`;
+    }
+    
+    const cicloInfoSpan = document.getElementById('cicloInfo');
+    if (cicloInfoSpan) {
+        cicloInfoSpan.innerHTML = `✅ Ciclo cargado: <strong>${cicloActual.nomeCiclo}</strong> (${cicloActual.modulos.length} módulos)`;
+    }
+    
+    // Amosar a táboa de módulos (FORZAR actualización)
+    actualizarTablaModulos();
+    
+    // Se xa hai faltas cargadas, recalcular todo
+    if (faltasData.length > 0) {
+        recalcularTodo();
+        displayResumenTable();
+        displayApercibimientos();
+        displayComunicaciones();
+    }
+    
+    showSuccess(`Cargado o ciclo "${cicloActual.nomeCiclo}" con ${cicloActual.modulos.length} módulos.`);
+}
+
+// Función para actualizar a táboa de módulos
+function actualizarTablaModulos() {
+    // Destruír DataTable existente se existe
+    if ($.fn.DataTable && $.fn.DataTable.isDataTable('#modulosTable')) {
+        $('#modulosTable').DataTable().destroy();
+    }
+    
+    // Construír o corpo da táboa
+    let body = '';
+    const modulosOrdenados = Object.keys(modulosData).sort();
+    
+    if (modulosOrdenados.length === 0) {
+        body = '<tr><td colspan="5" style="text-align: center;">Non hai módulos cargados para este ciclo</td></tr>';
+    } else {
+        modulosOrdenados.forEach(nome => {
+            const m = modulosData[nome];
+            body += `<tr>
+                <td><strong>${m.nome}</strong> <span style="color: #666; font-size: 0.85em;">(${m.curso})</span></td>
+                <td style="text-align: center;">${m.horas}</td>
+                <td style="text-align: center;">${m.sesionesTotales}</td>
+                <td style="text-align: center; font-weight: bold; color: #dc3545;">${m.umbral6}</td>
+                <td style="text-align: center; font-weight: bold; color: #fd7e14;">${m.umbral4}</td>
+            </tr>`;
+        });
+    }
+    
+    // Actualizar o corpo da táboa
+    const modulosBody = document.getElementById('modulosBody');
+    if (modulosBody) {
+        modulosBody.innerHTML = body;
+    }
+    
+    // Reinicializar DataTable
+    if ($.fn.DataTable) {
+        $('#modulosTable').DataTable({
+            language: datatableSpanish,
+            pageLength: 100,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+            order: [[0, 'asc']]
+        });
+    }
+}
+
+
+// Modificar a función displayModulosTable para que use DataTables con filtro
+function displayModulosTable() {
+    let body = '';
+    const modulosOrdenados = Object.keys(modulosData).sort();
+    
+    modulosOrdenados.forEach(nome => {
+        const m = modulosData[nome];
+        body += `<tr>
+            <td><strong>${m.nome}</strong> <span style="color: #666; font-size: 0.85em;">(${m.curso})</span></td>
+            <td style="text-align: center;">${m.horas}</td>
+            <td style="text-align: center;">${m.sesionesTotales}</td>
+            <td style="text-align: center; font-weight: bold; color: #dc3545;">${m.umbral6}</td>
+            <td style="text-align: center; font-weight: bold; color: #fd7e14;">${m.umbral4}</td>
+        </tr>`;
+    });
+    
+    document.getElementById('modulosBody').innerHTML = body;
+    
+    // Inicializar ou actualizar DataTable
+    if ($.fn.DataTable) {
+        if ($.fn.DataTable.isDataTable('#modulosTable')) {
+            $('#modulosTable').DataTable().destroy();
+        }
+        
+        $('#modulosTable').DataTable({
+            language: datatableSpanish,
+            pageLength: 100,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+            order: [[0, 'asc']],
+            // Engadir un filtro adicional para curso
+            initComplete: function() {
+                // Engadir un selector de filtro por curso
+                const api = this.api();
+                const header = $('#modulosTable thead tr');
+                
+
+                // Aplicar filtros
+                $('#modulosTable thead .filtro-curso input').on('keyup change', function() {
+                    const colIndex = $(this).closest('th').index();
+                    api.column(colIndex).search(this.value).draw();
+                });
+            }
+        });
+    }
+}
+
+
+
+document.getElementById('inputText').addEventListener('input', processInput);
+
+
+function toggleControlsSection() {
+    const section = document.getElementById('controlsSection');
+    const btn = document.getElementById('toggleControlsBtn');
+    if (section.style.display === 'none') {
+        section.style.display = 'block';
+        btn.innerHTML = '📁 Ocultar Controles';
+    } else {
+        section.style.display = 'none';
+        btn.innerHTML = '📁 Mostrar Controles';
+    }
+}
+
+
+// ******************************************************************
+// *** ARREGLAR CODIFICACIÓN Y PARSEAR  DATOS
+// ******************************************************************
+
+        function fixEncoding(text) {
+            return text
+                .replace(/Ã§/g, 'ç')
+                .replace(/Ã±/g, 'ñ')
+                .replace(/Ã¡/g, 'á')
+                .replace(/Ã©/g, 'é')
+                .replace(/Ã­/g, 'í')
+                .replace(/Ã³/g, 'ó')
+                .replace(/Ãº/g, 'ú')
+                .replace(/Ã¼/g, 'ü')
+                .replace(/Ã‘/g, 'Ñ')
+                .replace(/Ã/g, 'Á')
+                .replace(/Ã‰/g, 'É')
+                .replace(/Ã/g, 'Í')
+                .replace(/Ã“/g, 'Ó')
+                .replace(/Ãš/g, 'Ú')
+                .replace(/Ãœ/g, 'Ü')
+                .replace(/Â/g, '');
+        }
+
+        function normalizeString(str) {
+            if (!str) return '';
+
+            // Eliminar espacios extras y convertir a minúsculas
+            // También eliminar puntuación común
+            return str.toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quitar acentos
+                .replace(/[.,;:!?]/g, '') // Quitar puntuación
+                .replace(/\s+/g, ' ') // Normalizar espacios
+                .trim();
+        }
+
+        function formatearNombreParaMostrar(apellidos, nombre) {
+            // Capitalizar correctamente
+            apellidos = capitalizarPalabras(apellidos);
+            nombre = capitalizarPalabras(nombre);
+            return `${apellidos}, ${nombre}`;
+        }
+
+        function parseDate(dateStr) {
+            // Formato esperado: DD/MM/YYYY
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+            return null;
+        }
+
+        function getCurrentDateFormatted() {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function getCurrentDateForFilename() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+// ******************************************************************
+// *** CARGAR APERCIBIMIENTOS PREVIOS DESDE CSV
+// ******************************************************************
+
+        function loadApercibimientosPreviosFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    let result = e.target.result;
+                    if (result.includes('Ã±') || result.includes('Ã³') || result.includes('Ã¡')) {
+                        result = fixEncoding(result);
+                    }
+                    contenidoOriginalApercibimientos = result;
+                    parseApercibimientosPreviosCSV(result);
+                };
+                reader.readAsText(file, 'ISO-8859-1');
+            }
+        }
+
+        function parseApercibimientosPreviosCSV(csvText) {
+            console.log('Borrando datos previos y cargando nuevos desde CSV...');
+            const lines = csvText.split('\n');
+            apercibimientosPrevios.clear();
+            comunicacionesPrevias.clear();
+            apercibimientosPreviosDetalle = [];
+            apercibimientosPorAlumnoModulo = {};
+
+            // Saltar cabecera
+            // @TODO: Parsear CABECERA DE CICLO; CURSO Y GRUPO?
+            // header = Cabecera de columnas: TIPO INFORME,DATA INFORME,DATA ACUSE,APELIDOS,NOME,MATERIA
+            const header = lines[0].trim();
+            let lineaInicioDatos = 1;
+
+            // Si existe una línea de metadatos antes de la cabecera, detectarla y ajustarla
+            if (header.split(',')[0] !== 'TIPO INFORME') {
+                curso = header.split(',')[0] || '';
+                ciclo = header.split(',')[1] || ''; 
+                grupo = header.split(',')[2] || '';
+                console.log(`Detectada línea de metadatos: Curso="${curso}", Ciclo="${ciclo}", Grupo="${grupo}"`);
+
+                // Actualiza la información del ciclo en Módulos y Umbrales                
+                actualizaModulos(ciclo);                
+                
+                lineaInicioDatos = 2;
+            }
+            
+            // Procesar cada línea de datos
+            for (let i = lineaInicioDatos; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line === '') continue;
+
+                const fields = [];
+                let currentField = '';
+                let inQuotes = false;
+
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        fields.push(currentField);
+                        currentField = '';
+                    } else {
+                        currentField += char;
+                    }
+                }
+                fields.push(currentField);
+
+                // Formato nuevo: apellidos en una sola columna
+                const tipo = fields[0].trim();
+                const dataInforme = fields[1].trim();
+                const dataAcuse = fields[2].trim();
+                const apellidos = fields[3].trim();
+                const nome = fields[4].trim();
+                const materia = fields[5].trim();
+
+                // Construir nombre completo (formato: "Apellidos, Nombre")
+                const nombreCompleto = `${apellidos}, ${nome}`;
+
+                // Buscar el módulo real en el mapping
+                const moduloReal = findModuloInMapping(materia);
+                const modulo = moduloReal || materia;
+
+                // Guardar según el tipo
+                const keyBase = `${normalizeString(nombreCompleto)}|${normalizeString(modulo)}`;
+
+                if (tipo.includes('Apercibimento')) {
+                    apercibimientosPrevios.add(keyBase);
+
+                    // Guardar el detalle con fecha de acuse
+                    const acuseDate = parseDate(dataAcuse);
+
+                    apercibimientosPreviosDetalle.push({
+                        tipo,
+                        dataInforme,
+                        dataAcuse,
+                        fechaAcuse: acuseDate,
+                        apellidos,
+                        nome,
+                        materia: modulo,
+                        nombreCompleto
+                    });
+
+                    // Guardar en mapa para acceso rápido
+                    const existing = apercibimientosPorAlumnoModulo[keyBase];
+                    if (!existing || (acuseDate && (!existing.fechaAcuse || acuseDate > existing.fechaAcuse))) {
+                        apercibimientosPorAlumnoModulo[keyBase] = {
+                            fechaAcuse: acuseDate,
+                            dataAcuse,
+                            dataInforme,
+                            tipo
+                        };
+                    }
+                } else if (tipo.includes('Comunicación')) {
+                    comunicacionesPrevias.add(keyBase);
+                }
+                
+            }
+
+            showSuccess(`Cargados ${lines.length - lineaInicioDatos} registros previos (${apercibimientosPrevios.size} apercibimientos, ${comunicacionesPrevias.size} comunicaciones).`);
+
+            /*processInput();*/
+            // Se xa hai faltas cargadas, recalcular todo
+            if (faltasData.length > 0) {
+                recalcularTodo();
+                displayResumenTable();
+                console.log('Mostrando datos con apercibimientos y comunicaciones previas cargados...');
+                displayApercibimientos();
+                displayComunicaciones();
+            }
+        }
+
+
+        function normalizeModuloName(name) {
+            if (!name) return '';
+
+            let normalized = name
+                .toLowerCase()
+                .replace(/[áàäâ]/g, 'a')
+                .replace(/[éèëê]/g, 'e')
+                .replace(/[íìïî]/g, 'i')
+                .replace(/[óòöô]/g, 'o')
+                .replace(/[úùüû]/g, 'u')
+                .replace(/ñ/g, 'n')
+                .replace(/ç/g, 'c')
+                .replace(/[\(\)]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            return normalized;
+        }
+
+
+        function findModuloInMapping(moduloName) {
+            if (!moduloName) return null;
+
+            if (sesionesPorModulo[moduloName]) {
+                return moduloName;
+            }
+
+            const normalized = normalizeModuloName(moduloName);
+
+            if (moduloMapping[normalized]) {
+                return moduloMapping[normalized];
+            }
+
+            for (let [key, value] of Object.entries(moduloMapping)) {
+                if (normalized.includes(key) || key.includes(normalized)) {
+                    return value;
+                }
+            }
+
+            for (let realName of Object.keys(sesionesPorModulo)) {
+                const realNormalized = normalizeModuloName(realName);
+                if (normalized.includes(realNormalized) || realNormalized.includes(normalized)) {
+                    return realName;
+                }
+            }
+
+            return null;
+        }
+
+
+
+        function actualizaModulos(ciclo) {
+            // Actualiza la información del ciclo en Módulos y Umbrales
+            const cicloSelector = document.getElementById('cicloSelector');
+            const index = ciclosDisponibles.findIndex(c => c.nomeCiclo === ciclo);
+            if (index !== -1) {
+                cicloSelector.selectedIndex = index;  // Usar selectedIndex en lugar de value
+                const changeEvent = new Event('change');
+                cicloSelector.dispatchEvent(changeEvent);
+            } 
+        }                
+
+
+
+        function processInput() {
+            const input = document.getElementById('inputText').value;
+            if (!input.trim()) {
+                showError('Por favor, introduce o contido de Faltas Detalladas: selecciona todo (Ctrl+A), copia (Ctrl+C) e pega (Ctrl+V).');
+                return;
+            }
+
+            try {
+                lines = input.split('\n');
+                faltasData = [];
+                alumnos.clear();
+                alumnosDetalle = {};
+                modulos.clear();
+
+                let currentStudent = '';
+                let currentStudentFull = '';
+
+                // Extraer información del curso, ciclo y grupo desde la línea 10 (índice 9)
+                curso = lines[9].substring(0, 2);                                       // Ej: "1º"
+                ciclo = lines[9].substring(3, lines[9].indexOf('-') - 1);               // Ej: "Administración de sistemas informáticos en rede"
+                grupo = lines[9].substring(lines[9].indexOf('-') + 2, lines[9].length); // Ej: "A"  
+
+                // Actualiza la información del ciclo en Módulos y Umbrales                
+                actualizaModulos(ciclo);
+                 
+
+                // Recorre todas las líneas para extraer los datos de faltas
+                lineaPagina = 0;
+                for (let i = 0; i < lines.length; i++) {
+                    // Salta las líneas de cabecera (asumiendo que las primeras 11 líneas son de información general)
+                    if (lineaPagina < 12) {
+                        lineaPagina++;
+                        continue;
+                    }
+                    
+                    let line = lines[i].trimRight();
+                    
+                    // Reiniciar el contador de líneas al detectar el pie de página)
+                    if (line.startsWith('Data')) {
+                        lineaPagina = 0; // Reiniciar contador de líneas para cada página
+                        continue;
+                    }                    
+
+                    if (line === '') continue;
+
+                    const studentMatch = line.match(/^(.+?, [^,]+?)(?=\s+\d{2}\/\d{2}\/\d{4})/);
+
+                    if (studentMatch) {
+                        currentStudentFull = studentMatch[1].trim();
+
+                        const nameParts = currentStudentFull.split(',');
+                        if (nameParts.length === 2) {
+                            const apellidos = nameParts[0].trim();
+                            const nombre = nameParts[1].trim();
+
+                            alumnosDetalle[currentStudentFull] = {
+                                apellidos,
+                                nombre
+                            };
+                        }
+
+                        alumnos.add(currentStudentFull);
+
+                        const faltaPart = line.substring(studentMatch[0].length).trim();
+                        if (faltaPart) {
+                            i = processFaltaLineWithContext(currentStudentFull, faltaPart, i);
+                        }
+                    }
+                    else if (currentStudentFull && line.match(/\d{2}\/\d{2}\/\d{4}/)) {
+                        i = processFaltaLineWithContext(currentStudentFull, line, i);
+                    }
+                }
+
+                if (faltasData.length === 0) {
+                    showError('Non se puideron extraer datos. Verifica que o formato sexa correcto.');
+                    return;
+                }
+
+
+
+
+
+                document.getElementById('stats').style.display = 'block';
+                document.getElementById('totalFaltas').textContent = faltasData.length;
+                document.getElementById('totalAlumnos').textContent = alumnos.size;
+                document.getElementById('totalModulos').textContent = modulos.size;
+
+                buildResumenMatrix();
+                displayFaltasDetalladas();
+
+                processApercibimentos()
+
+                document.getElementById('downloadBtn').disabled = false;
+                document.getElementById('downloadResumenBtn').disabled = false;
+                document.getElementById('printBtn').disabled = false;
+
+                // Ocultar controles
+                //document.getElementById('controlsSection').classList.add('hidden');
+
+            } catch (error) {
+                showError('Error al procesar: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        function processApercibimentos() {
+            recalcularTodo();
+
+            displayResumenTable();
+            displayApercibimientos();
+            displayComunicaciones();
+        }
+
+        function buildResumenMatrix() {
+            matrizResumen = {};
+            const modulosArray = Array.from(modulos).sort();
+
+            alumnos.forEach(alumno => {
+                matrizResumen[alumno] = {};
+                modulosArray.forEach(m => matrizResumen[alumno][m] = 0);
+            });
+
+            faltasData.forEach(falta => {
+                if (matrizResumen[falta.alumno] && falta.modulo) {
+                    matrizResumen[falta.alumno][falta.modulo]++;
+                }
+            });
+        }
+
+        function recalcularTodo() {
+            calcularApercibimientosPendientes();
+            calcularComunicacionesPendientes();
+        }
+
+
+        function processFaltaLineWithContext(student, line, currentIndex) {
+            // Extraer fecha
+            const fechaMatch = line.match(/(\d{2}\/\d{2}\/\d{4})/);
+            if (!fechaMatch) return currentIndex;
+
+            const fecha = fechaMatch[1];
+            const fechaObj = parseDate(fecha);
+
+            // Extraer tipo de falta (Asistencia o Puntualidade)
+            const tipoMatch = line.match(/(Asistencia|Puntualidade)/);
+            if (!tipoMatch) return currentIndex;
+
+            const tipoFalta = tipoMatch[1];
+
+            // Buscar el paréntesis de apertura
+            const openParenIndex = line.indexOf('(');
+            if (openParenIndex === -1) return currentIndex;
+
+            let parenContent = '';
+            let parenLevel = 1;
+            let i = openParenIndex + 1;
+            let lineIndex = currentIndex;
+            let currentLine = line;
+
+            // Recolectar contenido del paréntesis (puede ocupar múltiples líneas)
+            while (parenLevel > 0 && lineIndex < lines.length) {
+                while (i < currentLine.length) {
+                    const char = currentLine[i];
+                    if (char === '(') parenLevel++;
+                    if (char === ')') {
+                        parenLevel--;
+                        if (parenLevel === 0) {
+                            i++; // Avanzar después del cierre
+                            break;
+                        }
+                    }
+                    if (parenLevel > 0 || char !== ')') {
+                        parenContent += char;
+                    }
+                    i++;
+                }
+
+                if (parenLevel > 0) {
+                    lineIndex++;
+                    if (lineIndex < lines.length) {
+                        currentLine = lines[lineIndex].trimRight();
+                        i = 0;
+                        if (parenContent.length > 0 && !parenContent.endsWith(' ')) {
+                            parenContent += ' ';
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            // Determinar si la falta está justificada
+            let justificada = false;
+            let restoLinea = '';
+
+            // Obtener el resto de la línea actual después del paréntesis
+            if (i < currentLine.length) {
+                restoLinea = currentLine.substring(i).trim();
+            }
+
+            // Buscar Si/Non en el resto de la línea
+            if (restoLinea.includes('Si')) {
+                justificada = true;
+            } else if (restoLinea.includes('Non')) {
+                justificada = false;
+            } else {
+                // Buscar en la siguiente línea
+                const nextLineIndex = lineIndex + 1;
+                if (nextLineIndex < lines.length) {
+                    const nextLine = lines[nextLineIndex].trim();
+                    if (nextLine.includes('Si')) {
+                        justificada = true;
+                        lineIndex = nextLineIndex; // Consumir la línea
+                    } else if (nextLine.includes('Non')) {
+                        justificada = false;
+                        lineIndex = nextLineIndex; // Consumir la línea
+                    }
+                }
+            }
+
+            // Procesar el contenido del paréntesis para obtener hora y módulo
+            if (parenContent) {
+                const parts = parenContent.split(',');
+                if (parts.length >= 2) {
+                    let hora = parts[0].trim();
+                    let modulo = parts.slice(1).join(',').trim();
+                    modulo = modulo.replace(/\s+/g, ' ').trim();
+
+                    // Buscar el módulo en el mapping
+                    const moduloReal = findModuloInMapping(modulo);
+                    if (moduloReal) {
+                        modulo = moduloReal;
+                    }
+
+                    // Añadir el módulo al conjunto
+                    if (modulo) {
+                        modulos.add(modulo);
+                    }
+
+                    // Solo guardar si es ASISTENCIA y NO JUSTIFICADA
+                    if (tipoFalta === 'Asistencia' && !justificada) {
+                        faltasData.push({
+                            alumno: student,
+                            fecha: fecha,
+                            fechaObj: fechaObj,
+                            fechaSort: fechaObj ? fechaObj.toISOString().split('T')[0] : '',
+                            hora: hora,
+                            modulo: modulo
+                        });
+                    }
+                }
+            }
+
+            return lineIndex;
+        }
+
+
+        function calcularApercibimientosPendientes() {
+            apercibimientosPendientes = [];
+            const alumnosArray = Array.from(alumnos).sort();
+            const modulosArray = Array.from(modulos).sort();
+
+            modulosArray.forEach(modulo => {
+                const sesionesTotales = sesionesPorModulo[modulo] || 0;
+                if (sesionesTotales === 0) return;
+
+                const umbral6 = Math.floor(sesionesTotales * 0.06) + 1;
+
+                alumnosArray.forEach(alumno => {
+                    const faltas = matrizResumen[alumno]?.[modulo] || 0;
+                    if (faltas >= umbral6) {
+                        const porcentaje = ((faltas / sesionesTotales) * 100).toFixed(2);
+                        const key = `${normalizeString(alumno)}|${normalizeString(modulo)}`;
+
+                        if (!apercibimientosPrevios.has(key)) {
+                            apercibimientosPendientes.push({
+                                alumno,
+                                modulo,
+                                faltas,
+                                porcentaje,
+                                umbral6
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function calcularComunicacionesPendientes() {
+            comunicacionesPendientes = [];
+
+            if (apercibimientosPrevios.size === 0) return;
+
+            const alumnosArray = Array.from(alumnos).sort();
+            const modulosArray = Array.from(modulos).sort();
+
+            modulosArray.forEach(modulo => {
+                const sesionesTotales = sesionesPorModulo[modulo] || 0;
+                if (sesionesTotales === 0) return;
+
+                const umbral4 = Math.floor(sesionesTotales * 0.04) + 1;
+
+                alumnosArray.forEach(alumno => {
+                    const key = `${normalizeString(alumno)}|${normalizeString(modulo)}`;
+                    const apercibimiento = apercibimientosPorAlumnoModulo[key];
+
+                    if (apercibimiento && apercibimiento.fechaAcuse) {
+                        // Contar faltas desde la fecha de acuse
+                        const faltasDesdeAcuse = faltasData.filter(f =>
+                            normalizeString(f.alumno) === normalizeString(alumno) &&
+                            normalizeString(f.modulo) === normalizeString(modulo) &&
+                            f.fechaObj && apercibimiento.fechaAcuse && f.fechaObj > apercibimiento.fechaAcuse
+                        ).length;
+
+                        if (faltasDesdeAcuse >= umbral4) {
+                            const porcentaje = ((faltasDesdeAcuse / sesionesTotales) * 100).toFixed(2);
+                            const yaEnviada = comunicacionesPrevias.has(key);
+
+                            comunicacionesPendientes.push({
+                                alumno,
+                                modulo,
+                                fechaUltimoAperc: apercibimiento.dataAcuse,
+                                faltasDesdeAcuse,
+                                porcentaje,
+                                umbral4,
+                                yaEnviada
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function determinarClaseCelda(alumno, modulo, count) {
+            const sesionesTotales = sesionesPorModulo[modulo] || 0;
+            if (sesionesTotales === 0) return '';
+
+            const umbral6 = Math.floor(sesionesTotales * 0.06) + 1;
+            const key = `${normalizeString(alumno)}|${normalizeString(modulo)}`;
+
+            // Verificar si hay apercibimiento previo
+            const tieneApercibimiento = apercibimientosPrevios.has(key);
+
+            // Verificar si hay comunicación pendiente o enviada
+            const comunicacion = comunicacionesPendientes.find(c =>
+                normalizeString(c.alumno) === normalizeString(alumno) &&
+                normalizeString(c.modulo) === normalizeString(modulo)
+            );
+
+            if (comunicacion) {
+                return comunicacion.yaEnviada ? 'celda-comunicacion-enviada' : 'celda-comunicacion-pendiente';
+            }
+
+            if (count >= umbral6) {
+                return tieneApercibimiento ? 'celda-apercibimiento-enviado' : 'celda-apercibimiento-pendiente';
+            }
+
+            return '';
+        }
+
+        function displayFaltasDetalladas() {
+            let body = '';
+            faltasData.forEach(f => {
+                let apellidos = alumnosDetalle[f.alumno]?.apellidos || f.alumno.split(',')[0]?.trim() || '';
+                let nombre = alumnosDetalle[f.alumno]?.nombre || f.alumno.split(',')[1]?.trim() || '';
+                let fechaSort = f.fechaSort || '';
+
+                body += `<tr>
+                    <td>${apellidos}</td>
+                    <td>${nombre}</td>
+                    <td>${f.fecha}</td>
+                    <td>${f.hora}</td>
+                    <td>${f.modulo}</td>
+                </tr>`;
+            });
+
+            document.getElementById('faltasDetalladasBody').innerHTML = body;
+
+            // Inicializar DataTable
+            if ($.fn.DataTable) {
+                if ($.fn.DataTable.isDataTable('#faltasDetalladasTable')) {
+                    $('#faltasDetalladasTable').DataTable().destroy();
+                }
+                $('#faltasDetalladasTable').DataTable({
+                    language: datatableSpanish,
+                    pageLength: 100,
+                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+                    order: [[2, 'desc']], // Ordenar por fecha descendente
+                    columnDefs: [
+                        {targets: 2, type: 'fecha-ddmmyyyy'}                        
+                    ]
+                });
+            }
+        }
+
+        function displayResumenTable() {
+            const modulosArray = Array.from(modulos).sort();
+            const alumnosArray = Array.from(alumnos).sort();
+
+            let header = '<th>Alumno</th>';
+            modulosArray.forEach(m => {
+                const umbral = umbralesPorModulo[m]?.umbral6 || '?';
+                const displayName = m.length > 25 ? m.substring(0, 22) + '...' : m;
+                header += `<th title="${m} (Umbral 6%: ${umbral})">${displayName}<br><span class="umbral-info">Umbral: ${umbral}</span></th>`;
+            });
+            document.getElementById('tableHeader').innerHTML = header;
+
+            let body = '';
+            alumnosArray.forEach(alumno => {
+                let row = `<tr><td><strong>${alumno}</strong></td>`;
+                modulosArray.forEach(modulo => {
+                    const count = matrizResumen[alumno]?.[modulo] || 0;
+                    const claseCelda = determinarClaseCelda(alumno, modulo, count);
+
+                    row += `<td class="${claseCelda}" style="text-align: center;">${count}</td>`;
+                });
+                row += '</tr>';
+                body += row;
+            });
+
+
+            // Inicializar DataTable
+            if ($.fn.DataTable) {
+                if ($.fn.DataTable.isDataTable('#resumenTable')) {
+                    $('#resumenTable').DataTable().destroy();
+                }
+                document.getElementById('tableBody').innerHTML = body;
+
+                $('#resumenTable').DataTable({
+                    language: datatableSpanish,
+                    pageLength: 100,
+                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+                    order: [[0, 'asc']]
+                });
+            }
+        }
+
+        function displayApercibimientos() {
+            const alumnosArray = Array.from(alumnos).sort();
+            const modulosArray = Array.from(modulos).sort();
+
+            let apercibimientos = [];
+
+            modulosArray.forEach(modulo => {
+                const sesionesTotales = sesionesPorModulo[modulo] || 0;
+                if (sesionesTotales === 0) return;
+
+                const umbral6 = Math.floor(sesionesTotales * 0.06) + 1;
+
+                alumnosArray.forEach(alumno => {
+                    const faltas = matrizResumen[alumno]?.[modulo] || 0;
+                    if (faltas >= umbral6) {
+                        const porcentaje = ((faltas / sesionesTotales) * 100).toFixed(2);
+                        const key = `${normalizeString(alumno)}|${normalizeString(modulo)}`;
+                        const esPrevio = apercibimientosPrevios.has(key);
+
+                        apercibimientos.push({
+                            alumno,
+                            modulo,
+                            faltas,
+                            porcentaje,
+                            umbral6,
+                            esPrevio
+                        });
+                    }
+                });
+            });
+
+            apercibimientos.sort((a, b) => {
+                if (a.modulo < b.modulo) return -1;
+                if (a.modulo > b.modulo) return 1;
+                return b.porcentaje - a.porcentaje;
+            });
+
+            let body = '';
+            apercibimientos.forEach(a => {
+                const clase = a.esPrevio ? 'celda-apercibimiento-enviado' : 'celda-apercibimiento-pendiente';
+                const estado = a.esPrevio ? '✅ Ya enviado' : '🔶 Pendiente';
+                body += `<tr class="${clase}">
+                    <td><strong>${a.alumno}</strong></td>
+                    <td>${a.modulo}</td>
+                    <td style="text-align: center;">${a.faltas}</td>
+                    <td style="text-align: center;">${a.porcentaje}%</td>
+                    <td style="text-align: center;">${a.umbral6}</td>
+                    <td style="text-align: center;">${estado}</td>
+                </tr>`;
+            });
+
+            if (apercibimientos.length === 0) {
+                body = '<tr><td colspan="6" style="text-align: center; padding: 20px;">No hay alumnos con apercibimientos (≥6%).</td></tr>';
+            }
+
+            document.getElementById('apercibimientosBody').innerHTML = body;
+
+            // Inicializar DataTable
+            if ($.fn.DataTable) {
+                if ($.fn.DataTable.isDataTable('#apercibimientosTable')) {
+                    console.log('Destruyendo DataTable de apercibimientos para reinicializar...');
+                    $('#apercibimientosTable').DataTable().destroy();
+                }
+
+                document.getElementById('apercibimientosBody').innerHTML = body;
+
+                $('#apercibimientosTable').DataTable({
+                    language: datatableSpanish,
+                    pageLength: 100,
+                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+                    order: [[1, 'asc'], [2, 'desc']]
+                });
+            }
+        }
+
+
+
+
+
+
+        function displayComunicaciones() {
+            if (comunicacionesPendientes.length === 0) {
+                document.getElementById('comunicacionesBody').innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No hay comunicaciones pendientes.</td></tr>';
+
+                if ($.fn.DataTable && $.fn.DataTable.isDataTable('#comunicacionesTable')) {
+                    $('#comunicacionesTable').DataTable().destroy();
+                }
+                return;
+            }
+
+            let body = '';
+            comunicacionesPendientes.forEach(c => {
+                const clase = c.yaEnviada ? 'celda-comunicacion-enviada' : 'celda-comunicacion-pendiente';
+                const estado = c.yaEnviada ? '⚫ Ya enviada' : '🔴 Pendiente';
+                body += `<tr class="${clase}">
+                    <td><strong>${c.alumno}</strong></td>
+                    <td>${c.modulo}</td>
+                    <td style="text-align: center;">${c.fechaUltimoAperc}</td>
+
+
+                    <td style="text-align: center;">${c.faltasDesdeAcuse}</td>
+                    <td style="text-align: center;">${c.porcentaje}%</td>
+                    <td style="text-align: center;">${c.umbral4}</td>
+                    <td style="text-align: center;">${estado}</td>
+                </tr>`;
+            });
+
+            document.getElementById('comunicacionesBody').innerHTML = body;
+
+            // Inicializar DataTable
+            if ($.fn.DataTable) {
+                if ($.fn.DataTable.isDataTable('#comunicacionesTable')) {
+                    $('#comunicacionesTable').DataTable().destroy();
+                }
+
+                document.getElementById('comunicacionesBody').innerHTML = body;
+    
+
+                $('#comunicacionesTable').DataTable({
+                    language: datatableSpanish,
+                    columnDefs: [
+                        {
+                            targets: 2, // La columna de fechaUltimoAperc (índice 2)
+                            type: 'fecha-ddmmyyyy'
+                        }
+                    ],                    
+                    pageLength: 100,
+                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+                    order: [[1, 'asc'], [3, 'desc']]
+                });
+            }
+        }
+
+
+function guardarApercibimientos() {
+    const fechaActual = getCurrentDateFormatted();
+    const fechaFilename = getCurrentDateForFilename();
+
+    let nuevosRegistros = [];
+
+    apercibimientosPendientes.forEach(a => {
+        nuevosRegistros.push(crearRegistro(a, 'ApercibimentoPD', fechaActual));
+    });
+
+    const comunicacionesNuevas = comunicacionesPendientes.filter(c => !c.yaEnviada);
+    comunicacionesNuevas.forEach(c => {
+        nuevosRegistros.push(crearRegistro(c, 'ComunicaciónPD', fechaActual));
+    });
+
+    showSuccess(`Se han añadido ${apercibimientosPendientes.length} apercibimientos y ${comunicacionesNuevas.length} comunicaciones PD . Archivo guardado como ${fechaFilename}_DATOS_Apercibimentos_completo.csv`);
+
+    // Generar CSV completo con el nuevo formato
+    let csvCompleto = contenidoOriginalApercibimientos;
+    // Asegurar que termina con salto de línea
+    if (!csvCompleto.endsWith('\n')) {
+        csvCompleto += '\n';
+    }
+    // Añadir nuevos registros en el nuevo formato
+    nuevosRegistros.forEach(r => {
+        csvCompleto += `${r.tipo},${r.dataInforme},${r.dataAcuse},${r.apellidos},${r.nome},${r.materia}\n`;
+    });
+
+    downloadCSVFile(csvCompleto, `${fechaFilename}_DATOS_Apercibimentos_completo.csv`);
+}
+
+
+function crearRegistro(item, tipo, fechaActual) {
+    const nombreCompleto = item.alumno;
+    const parts = nombreCompleto.split(',');
+    let apellidos = '';
+    let nome = '';
+    
+    if (parts.length === 2) {
+        apellidos = capitalizarPalabras(parts[0].trim());
+        nome = capitalizarPalabras(parts[1].trim());
+    } else {
+        apellidos = capitalizarPalabras(nombreCompleto);
+        nome = '';
+    }
+    
+    return {
+        tipo: tipo,
+        dataInforme: fechaActual,
+        dataAcuse: '',
+        apellidos: apellidos,
+        nome: nome,
+        materia: item.modulo
+    };
+}
+
+
+        function capitalizarPalabras(texto) {
+            if (!texto) return texto;
+
+            return texto.split(' ').map(palabra => {
+                if (palabra.length === 0) return palabra;
+
+                // Palabras que deben mantenerse en minúscula (preposiciones, artículos, etc.)
+                const minusculas = ['de', 'da', 'do', 'dos', 'das', 'del', 'y', 'e', 'i', 'o', 'a', 'os', 'as'];
+                const palabraLower = palabra.toLowerCase();
+
+                if (minusculas.includes(palabraLower)) {
+                    return palabraLower;
+                }
+
+                // Capitalizar primera letra, resto minúscula
+                return palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase();
+            }).join(' ');
+        }
+
+
+        function downloadCSV() {
+            if (faltasData.length === 0) return;
+
+            let csv = 'Apellidos,Nombre,Fecha,Hora,Módulo\n';
+            faltasData.forEach(f => {
+                let apellidos = alumnosDetalle[f.alumno]?.apellidos || f.alumno.split(',')[0]?.trim() || '';
+                let nombre = alumnosDetalle[f.alumno]?.nombre || f.alumno.split(',')[1]?.trim() || '';
+
+                csv += `"${apellidos}","${nombre}",${f.fecha},${f.hora},"${f.modulo}"\n`;
+            });
+
+            downloadCSVFile(csv, 'faltas_detalladas.csv');
+        }
+
+        function downloadResumenCSV() {
+            if (Object.keys(matrizResumen).length === 0) return;
+
+            const modulosArray = Array.from(modulos).sort();
+            const alumnosArray = Array.from(alumnos).sort();
+
+            let csv = 'Alumno,' + modulosArray.join(',') + '\n';
+
+            alumnosArray.forEach(alumno => {
+                let row = `"${alumno}"`;
+                modulosArray.forEach(modulo => {
+                    const count = matrizResumen[alumno]?.[modulo] || 0;
+                    row += `,${count}`;
+                });
+                csv += row + '\n';
+            });
+
+            downloadCSVFile(csv, 'tabla_resumen.csv');
+        }
+
+        function downloadCSVFile(content, filename) {
+            const blob = new Blob(["\uFEFF" + content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function generarInformeImpresion() {
+            // Crear una nueva ventana para impresión
+            const ventanaImpresion = window.open('', '_blank');
+
+            // Obtener los datos actuales
+            const fechaInforme = getCurrentDateFormatted();
+
+            // Generar contenido HTML con saltos de página
+            let contenidoHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Informe de Faltas - ${fechaInforme}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+                    h2 { color: #555; margin-top: 30px; }
+                    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; font-size: 12px; }
+                    th { background-color: #007bff; color: white; padding: 8px; text-align: left; }
+                    td { border: 1px solid #ddd; padding: 6px; }
+                    tr:nth-child(even) { background-color: #f9f9f9; }
+                    .fecha { color: #666; margin-bottom: 20px; }
+                    .umbral-info { font-size: 0.85em; color: #666; }
+                    .nota { font-style: italic; color: #666; margin-top: 30px; }
+                    .page-break { page-break-before: always; }
+                    @media print {
+                        .page-break { page-break-before: always; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>📊 Informe de Faltas de Asistencia</h1>
+                <div class="fecha">Fecha del informe: ${fechaInforme}</div>
+            `;
+
+            // 1. Módulos y Umbrales (sin salto de página antes)
+            if (Object.keys(modulosData).length > 0) {
+                contenidoHTML += '<h2>1. Módulos y Umbrales</h2>';
+                contenidoHTML += '<table><thead><tr><th>Módulo</th><th>Horas</th><th>Sesiones (50\')</th><th>Umbral 6%</th><th>Umbral 4%</th></tr></thead><tbody>';
+
+                Object.keys(modulosData).sort().forEach(nome => {
+                    const m = modulosData[nome];
+                    contenidoHTML += `<tr>
+                        <td>${m.nome}</td>
+                        <td style="text-align: center;">${m.horas}</td>
+                        <td style="text-align: center;">${m.sesionesTotales}</td>
+                        <td style="text-align: center;">${m.umbral6}</td>
+                        <td style="text-align: center;">${m.umbral4}</td>
+                    </tr>`;
+                });
+
+                contenidoHTML += '</tbody></table>';
+            }
+
+            // 3. Tabla Resumen (con salto de página)
+            if (Object.keys(matrizResumen).length > 0) {
+                contenidoHTML += '<div class="page-break"></div>';
+                contenidoHTML += '<h2>2. Tabla Resumen de Faltas</h2>';
+                contenidoHTML += '<p><strong>Leyenda:</strong> Sin color (<6%), Naranja (pendiente), Amarillo (enviado), Rojo (comunicación pendiente), Negro (comunicación enviada)</p>';
+
+                const modulosArray = Array.from(modulos).sort();
+                const alumnosArray = Array.from(alumnos).sort();
+
+                contenidoHTML += '<table><thead><tr><th>Alumno</th>';
+                modulosArray.forEach(m => {
+                    contenidoHTML += `<th>${m.length > 20 ? m.substring(0, 17) + '...' : m}</th>`;
+                });
+                contenidoHTML += '</tr></thead><tbody>';
+
+                alumnosArray.forEach(alumno => {
+                    contenidoHTML += `<tr><td><strong>${alumno}</strong></td>`;
+                    modulosArray.forEach(modulo => {
+                        const count = matrizResumen[alumno]?.[modulo] || 0;
+                        contenidoHTML += `<td style="text-align: center;">${count}</td>`;
+                    });
+                    contenidoHTML += '</tr>';
+                });
+
+                contenidoHTML += '</tbody></table>';
+            }
+
+            // 4. Apercibimientos (con salto de página)
+            if (apercibimientosPendientes.length > 0 || document.getElementById('apercibimientosBody').children.length > 0) {
+                contenidoHTML += '<div class="page-break"></div>';
+                contenidoHTML += '<h2>3. Apercibimientos (≥6%)</h2>';
+                contenidoHTML += '<table><thead><tr><th>Alumno</th><th>Módulo</th><th>Faltas</th><th>%</th><th>Umbral</th><th>Estado</th></tr></thead><tbody>';
+
+                const filasAperc = document.getElementById('apercibimientosBody').children;
+                for (let i = 0; i < filasAperc.length; i++) {
+                    const celdas = filasAperc[i].cells;
+                    if (celdas.length >= 6) {
+                        contenidoHTML += `<tr>
+                            <td>${celdas[0].textContent}</td>
+                            <td>${celdas[1].textContent}</td>
+                            <td style="text-align: center;">${celdas[2].textContent}</td>
+                            <td style="text-align: center;">${celdas[3].textContent}</td>
+                            <td style="text-align: center;">${celdas[4].textContent}</td>
+                            <td style="text-align: center;">${celdas[5].textContent}</td>
+                        </tr>`;
+                    }
+                }
+
+                contenidoHTML += '</tbody></table>';
+            }
+
+            // 5. Comunicaciones (con salto de página)
+            if (comunicacionesPendientes.length > 0) {
+                contenidoHTML += '<div class="page-break"></div>';
+                contenidoHTML += '<h2>4. Comunicaciones PD</h2>';
+                contenidoHTML += '<table><thead><tr><th>Alumno</th><th>Módulo</th><th>Fecha último aperc.</th><th>Faltas desde</th><th>%</th><th>Umbral</th><th>Estado</th></tr></thead><tbody>';
+
+                comunicacionesPendientes.forEach(c => {
+                    contenidoHTML += `<tr>
+                        <td>${c.alumno}</td>
+                        <td>${c.modulo}</td>
+                        <td style="text-align: center;">${c.fechaUltimoAperc}</td>
+                        <td style="text-align: center;">${c.faltasDesdeAcuse}</td>
+                        <td style="text-align: center;">${c.porcentaje}%</td>
+                        <td style="text-align: center;">${c.umbral4}</td>
+                        <td style="text-align: center;">${c.yaEnviada ? 'Ya enviada' : 'Pendiente'}</td>
+                    </tr>`;
+                });
+
+                contenidoHTML += '</tbody></table>';
+            }
+
+            contenidoHTML += `
+                <div class="nota">Informe generado automáticamente por el Analizador de Faltas.</div>
+            </body>
+            </html>
+            `;
+
+            ventanaImpresion.document.write(contenidoHTML);
+            ventanaImpresion.document.close();
+            ventanaImpresion.print();
+        }
+
+        function showError(message) {
+            document.getElementById('error').textContent = message;
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('success').style.display = 'none';
+            document.getElementById('warning').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            document.getElementById('success').textContent = message;
+            document.getElementById('success').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('warning').style.display = 'none';
+        }
+
+        function showWarning(message) {
+            document.getElementById('warning').textContent = message;
+            document.getElementById('warning').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('success').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>
