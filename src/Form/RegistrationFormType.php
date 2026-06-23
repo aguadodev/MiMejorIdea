@@ -11,6 +11,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Tito10047\AltchaBundle\Type\AltchaType;
 
 class RegistrationFormType extends AbstractType
 {
@@ -43,6 +44,12 @@ class RegistrationFormType extends AbstractType
                         'max' => 4096,
                     ]),
                 ],
+            ])
+            ->add('security', AltchaType::class, [
+                'label' => false,
+                'floating' => true,   // Widget flotante
+                'hide_logo' => false,
+                'hide_footer' => false,
             ])
         ;
     }

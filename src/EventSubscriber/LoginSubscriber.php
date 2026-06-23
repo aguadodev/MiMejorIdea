@@ -7,7 +7,6 @@ use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Http\Event\CheckPassportEvent;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use App\Entity\User;
 
 
 
@@ -27,6 +26,7 @@ class LoginSubscriber implements EventSubscriberInterface
         $user = $event->getAuthenticatedToken()->getUser();
 
         // Actualiza la fecha de último acceso
+        /** @var \App\Entity\User $user */
         $user->setLastLogin(new \DateTime());
         // Persiste el usuario en la base de datos
         $this->entityManager->flush();
@@ -35,6 +35,7 @@ class LoginSubscriber implements EventSubscriberInterface
     public function onCheckPassportEvent(CheckPassportEvent $event): void
     {
         // Obtiene el usuario que intenta iniciar sesión
+        /** @var \App\Entity\User $user */
         $user = $event->getPassport()->getUser();
         // Si el usuario no está verificado lanzamos una excepción
         if (!$user->isVerified()) {

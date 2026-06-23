@@ -225,5 +225,18 @@
     },
     "symfonycasts/verify-email-bundle": {
         "version": "v1.17.4"
+    },
+    "tito10047/altcha-bundle": {
+        "version": "2.1",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "2.0",
+            "ref": "64d5bc8d22b01ee6917ed754613fa5befc1ac486"
+        },
+        "files": [
+            "./config/packages/altcha.yaml",
+            "./config/routes/altcha.yaml"
+        ]
     }
 }
