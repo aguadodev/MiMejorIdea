@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analizador de Cualificacións - Xerador de Acta ODT</title>
+    <title>Analizador de Cualificacións</title>
 
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
@@ -327,14 +327,14 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Analizador de Cualificacións - Xerador de Acta ODT</h1>
-            <p>Analiza o CSV de cualificacións e xera a acta de avaliación co formato oficial</p>
+            <h1>📊 Analizador de Cualificacións</h1>
+            <p>Analiza o informe "AL080" e xera a acta de avaliación e informes individualizados</p>
         </div>
 
         <div class="main-content">     
             <div id="acta-file">
                 <div id="mensaxeInicial">
-                    <p>📁 Selecciona un ficheiro CSV do informe "AL080-Listaxe cualificacións" para comezar...</p>
+                    <p>📁 Selecciona o ficheiro do informe "AL080-Listaxe cualificacións" para comezar...</p>
                 </div>                  
                 <div class="file-input-area">                  
                     <input type="file" id="csvFileInput" accept=".csv">                    
@@ -357,7 +357,8 @@
             <hr>
 
             <div id="mensaxeActa">
-                <p>📁 Cubre a información básica da acta da reunión... despois poderás editala e imprimila.</p>
+                
+                <p>📁 Cubre a información básica da Acta de Avaliación... despois poderás editala e imprimila.</p>
             </div>
             <div id="acta-info" class="row">
                 <div class="form-group">
@@ -520,15 +521,18 @@ async function generarInformeIndividualizado(alumno) {
             form.getTextField('frmGrupo').setText('A');
             form.getTextField('frmFecha').setText(dataFormateada);
             form.getTextField('frmTitor').setText(titor);
+            console.log("DATOS CICLO OK");
 
             // DATOS ALUMNO
             form.getTextField('frmNombre').setText(nombre);
             form.getTextField('frmApelidos').setText(apellidos);
             form.getTextField('frmDNI').setText(alumno.doi);
+            console.log("DATOS ALUMNO OK");
 
             // DATOS MÓDULOS SUSPENSOS
             for (let i = 0; i < modulos.length; i++) {
                 //campo.enableReadOnly(); Si se quiere hacer un campo de sólo lectura
+                console.log("DATOS MOD");
                 form.getTextField(`frmModNombre${i}`).setText(modulos[i].modulo);
                 //form.getTextField(`frmModConvocatoria${i}`).setText('1ª');
                 form.getTextField(`frmModCualificacion${i}`).setText(modulos[i].nota);
