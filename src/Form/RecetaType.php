@@ -16,6 +16,8 @@ use App\Form\EventListener\RecetaAddNewIngredientListener;
 
 class RecetaType extends AbstractType
 {
+    private IngredienteRepository $ingredienteRepository;
+    
     // Constructor
     public function __construct(IngredienteRepository $ingredienteRepository)
     {
@@ -36,7 +38,6 @@ class RecetaType extends AbstractType
                 'autocomplete' => true,
                 'multiple' => true,
                 'required'   => false,
-                //'empty_data' => 'John Doe',
                 'tom_select_options' => ["create" => true,
                                          "allowEmptyOption" => true],
                 

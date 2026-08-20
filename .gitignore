@@ -13,3 +13,8 @@
 
 /public/assets/img/profile_photos/*
 !/public/assets/img/profile_photos/default_profile_photo.png
+
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
