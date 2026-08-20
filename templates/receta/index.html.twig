@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recetas{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+    <script>
+    $(document).ready( function () {
+        $('#recetas').DataTable( {
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/es-ES.json'
+        }
+    } );
+    } );
+    </script>
+
+{% endblock %}    
+
+{% block body %}
+    <h2>Recetas</h2>
+
+    <table class="table" id="recetas">
+        <thead>
+            <tr>
+                <th>Título</th>
+                {#<th>Notas</th>#}
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for recetum in recetas %}
+            <tr>
+                <td>
+                    <a href="{{ path('app_receta_show', {'id': recetum.id}) }}">{{ recetum.titulo }}</a>
+                </td>
+                {#<td>{{ recetum.notas }}</td>#}
+                <td>
+                    {#<a href="{{ path('app_menu_new', {fechaHora: 0, receta: recetum.id}) }}" class="button primary small">+Menú</a>#}
+
+                    {% if is_granted('ROLE_USER') and app.user == recetum.user or is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_receta_edit', {'id': recetum.id}) }}" class="button primary small">Editar</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">No hay datos</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_receta_new') }}" class="button primary">Crear Nueva Receta</a>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nueva Receta{% endblock %}
+
+{% block body %}
+    <h2>Crear Nueva Receta</h2>
+
+    {{ include('receta/_form.html.twig') }}
+
+    <a href="{{ path('app_receta_index') }}" class="button primary">Volver al listado</a>
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+    {% include '_tinymce.html' with {'selector': 'receta_notas'} %}
+{% endblock %} 

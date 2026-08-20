@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar Receta{% endblock %}
+
+{% block body %}
+    <h2>Editar Receta</h2>
+
+    {{ include('receta/_form.html.twig', {'button_label': 'Actualizar'}) }}
+
+    {{ include('receta/_delete_form.html.twig') }}
+
+    <a href="{{ path('app_receta_index') }}" class="button primary">Volver al listado</a>
+    
+{% endblock %}
+
+
+
+{% block javascripts %}
+    {{ parent() }}
+    {% include '_tinymce.html' with {'selector': 'receta_notas'} %}
+{% endblock %}

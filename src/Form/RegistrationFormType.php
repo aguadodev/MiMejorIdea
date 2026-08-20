@@ -48,8 +48,8 @@ class RegistrationFormType extends AbstractType
             ->add('security', AltchaType::class, [
                 'label' => false,
                 'floating' => true,   // Widget flotante
-                'hide_logo' => false,
-                'hide_footer' => false,
+                'hide_logo' => true,
+                'hide_footer' => true,
             ])
         ;
     }
