@@ -24,6 +24,7 @@ class RecetaController extends AbstractController
         ]);
     }
 
+    
     #[Route('/user', name: 'app_receta_user', methods: ['GET'])]
     #[IsGranted("ROLE_USER")]    
     public function misRecetas(RecetaRepository $recetaRepository): Response
@@ -32,6 +33,7 @@ class RecetaController extends AbstractController
             'recetas' => $recetaRepository->findByUser($this->getUser()),
         ]);
     }
+
 
     #[Route('/new', name: 'app_receta_new', methods: ['GET', 'POST'])]
     #[IsGranted("ROLE_USER")]    
@@ -53,6 +55,7 @@ class RecetaController extends AbstractController
         ]);
     }
 
+
     #[Route('/{id}', name: 'app_receta_show', methods: ['GET'])]
     public function show(Receta $recetum): Response
     {
@@ -60,6 +63,7 @@ class RecetaController extends AbstractController
             'recetum' => $recetum,
         ]);
     }
+
 
     #[Route('/{id}/json', name: 'app_receta_show_json', methods: ['GET'])]
     public function showJson(Receta $recetum): Response
@@ -78,6 +82,7 @@ class RecetaController extends AbstractController
         //dd ($this->json($json));
         return $this->json($json);
     }
+
 
     #[Route('/{id}/edit', name: 'app_receta_edit', methods: ['GET', 'POST'])]
     #[IsGranted("ROLE_USER")]    
@@ -100,6 +105,7 @@ class RecetaController extends AbstractController
             'form' => $form,
         ]);
     }
+
 
     #[Route('/{id}', name: 'app_receta_delete', methods: ['POST'])]
     #[IsGranted("ROLE_USER")]    
