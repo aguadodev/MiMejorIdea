@@ -24,7 +24,7 @@ class RecetaController extends AbstractController
         ]);
     }
 
-    
+
     #[Route('/user', name: 'app_receta_user', methods: ['GET'])]
     #[IsGranted("ROLE_USER")]    
     public function misRecetas(RecetaRepository $recetaRepository): Response
@@ -88,9 +88,11 @@ class RecetaController extends AbstractController
     #[IsGranted("ROLE_USER")]    
     public function edit(Request $request, Receta $recetum, RecetaRepository $recetaRepository): Response
     {
-        /*if ($recetum->getUser() !== $this->getUser() &&  !$this->isGranted('ROLE_ADMIN')) {
+        /* PROHIBE AACESO SI EL USUARIO NO ES EL CREADOR DE LA RECETA O ADMIN
+        if ($recetum->getUser() !== $this->getUser() &&  !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException();
-        }*/
+        }
+        */
 
         $form = $this->createForm(RecetaType::class, $recetum);
         $form->handleRequest($request);

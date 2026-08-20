@@ -8,17 +8,14 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
 use App\Repository\IngredienteRepository;
-use App\Form\IngredienteAutocompleteField;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use App\Form\EventListener\RecetaAddNewIngredientListener;
 
 class RecetaType extends AbstractType
 {
     private IngredienteRepository $ingredienteRepository;
     
-    // Constructor
     public function __construct(IngredienteRepository $ingredienteRepository)
     {
         $this->ingredienteRepository = $ingredienteRepository;
